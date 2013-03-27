@@ -4,7 +4,9 @@ ghc --make src/Main.hs
 for ICON in left_arrow\
             right_arrow\
             up_arrow\
-            down_arrow 
+            down_arrow\
+            right_triangle 
         do
             src/Main --select=$ICON -o $ICON.svg -w 800 -h 800
         done
+eog *.svg
