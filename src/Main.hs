@@ -34,7 +34,6 @@
  
  enveloppe =  mconcat $ map stroke pathList    # lineJoin LineJoinRound 
                                                # lc themeLc
-                                               # fc themeFc
                                                # centerXY
                                                # lw 0.03
                                                # scale 1.2
@@ -42,8 +41,8 @@
               h = 3/4
               w = 1
               ltratio = 1/3
-              lower_tip = p2 ( (w/2), ltratio * h)
-              upper_tip = p2 ( (w/2), (1 - ltratio ) * h)
+              lower_tip = p2 ( w/2, ltratio * h)
+              upper_tip = p2 ( w/2, (1 - ltratio ) * h)
               lu_corner = p2 (0, h)
               ru_corner = p2 (w, h)
               lb_corner = p2 (0, 0)
@@ -94,7 +93,7 @@
  backgroundShape' = circle 1 # fc themeBc
  
  allIconsArg = map (padIcon 1.1) allIcons
-        where padIcon  x (name, icon)  = (name, (icon # fc themeFc # lc themeFc 
+        where padIcon  x (name, icon)  = (name, (icon  
                                          <>  backgroundShape') # pad x  ) 
  iconList = map snd allIconsArg
  overviewImage = hcat iconList
@@ -102,4 +101,10 @@
   
  allIconsFinal = ( "overview", overviewImage) : allIconsArg
  
- main = multiMain allIconsFinal
+ setColorOnAll color  = map  f  
+        where f ( x, y ) = (x, y # fc color # lc color)
+ 
+ 
+ main = do
+       colorString <- getLine
+       multiMain $  setColorOnAll (sRGB24read colorString) allIconsFinal 

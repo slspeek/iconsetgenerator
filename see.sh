@@ -20,8 +20,8 @@ for ICON in left_arrow\
             plus\
             favorite\
             minus        
-        do
-            src/Main --select=$ICON -o icons/$ICON.png -w 800 -h 800
-        done
-src/Main --select=overview -o icons/overview.png -w $(( 18 * 48 ))  -h 48
+do
+ src/Main --select=$ICON -o icons/$ICON.png -w 800 -h 800 <<< "#809070";
+done
+src/Main --select=overview -o icons/overview.png -w $(( 18 * 48 ))  -h 48 <<< "#809070"
 eog icons/overview.png
