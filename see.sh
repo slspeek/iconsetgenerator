@@ -15,8 +15,9 @@ for ICON in left_arrow\
             home\
             end\
             stepUp\
-            stepDown         
+            stepDown\
+            mail        
         do
             src/Main --select=$ICON -o icons/$ICON.svg -w 800 -h 800
         done
-eog icons/*.svg
+eog icons/mail.svg

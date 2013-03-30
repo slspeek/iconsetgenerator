@@ -6,31 +6,52 @@
  
  themeFc =  sRGB24read "#FFFFFF"
  themeBc =  sRGB24read "#000000"
+ themeLc =  blue
+ 
  
  rightTriangle size = eqTriangle 1 # rotateBy (3/4)                                      
  
                       
- leftArrow' size = polygon with { polyType   = PolySides [ 1/4 :: CircleFrac,
+ leftArrow = polygon with { polyType   = PolySides [ 1/4 :: CircleFrac,
                                                   -1/4 :: CircleFrac,
                                                   3/8 :: CircleFrac,
                                                   1/4 :: CircleFrac,
                                                   3/8 :: CircleFrac
                                                   ]
-                                                [ size/3 ,
-                                                 size ,
+                                                [ 1/3 ,
+                                                 1 ,
                                                   a,
                                                    eqSide,
                                                     eqSide,
                                                      a],
                                polyOrient = OrientV } # alignX 0
-          where a = size /6
-                eqSide =  2 * sqrt ( size/3 *a) 
+          where a = 1 /6
+                eqSide =  2 * sqrt ( 1/3 *a) 
  
- 
- 
+ enveloppe =  mconcat $ map stroke pathList    # lineJoin LineJoinRound 
+                                               # lc themeLc
+                                               # fc themeFc
+                                               # centerXY
+                                               # lw 0.03
+        where                                            
+              h = 3/4
+              w = 1
+              ltratio = 1/3
+              lower_tip = p2 ( (w/2), ltratio * h)
+              upper_tip = p2 ( (w/2), (1 - ltratio ) * h)
+              lu_corner = p2 (0, h)
+              ru_corner = p2 (w, h)
+              lb_corner = p2 (0, 0)
+              rb_corner = p2 (w, 0)
+              envList = [lu_corner, ru_corner, rb_corner, lb_corner]
+              flap = fromVertices [lu_corner, lower_tip, ru_corner]
+              lowerFlap = fromVertices [lb_corner, upper_tip, rb_corner]
+              env =   close (fromVertices envList)
+              pathList = [ flap, lowerFlap, env]
+              
+  
  strutedVrule = strutX 0.1 ||| vrule 1 # lw 0.2 ||| strutX 0.1        
         
- leftArrow = leftArrow' 1
  rightArrow = leftArrow # reflectX 
  upArrow = rightArrow # rotateBy (1/4)
  downArrow = upArrow # rotateBy (1/2) 
@@ -57,6 +78,7 @@
               ( "stepUp", stepUp),
               ( "stepDown", stepDown),
               ( "end", endIcon),
+              ( "mail", enveloppe),
               ( "fast_forward", fastForward),
               ( "fast_backward", fastBackward) ]
 
