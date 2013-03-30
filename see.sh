@@ -16,8 +16,12 @@ for ICON in left_arrow\
             end\
             stepUp\
             stepDown\
-            mail        
+            mail\
+            plus\
+            favorite\
+            minus        
         do
-            src/Main --select=$ICON -o icons/$ICON.svg -w 800 -h 800
+            src/Main --select=$ICON -o icons/$ICON.png -w 800 -h 800
         done
-eog icons/mail.svg
+src/Main --select=overview -o icons/overview.png -w $(( 18 * 48 ))  -h 48
+eog icons/overview.png

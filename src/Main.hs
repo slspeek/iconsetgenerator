@@ -1,30 +1,34 @@
  {-# LANGUAGE NoMonomorphismRestriction #-}
  
  import Diagrams.Prelude
- import Diagrams.Backend.SVG.CmdLine
+ import Diagrams.Backend.Cairo.CmdLine
  import Data.Colour.SRGB
+ import Diagrams.Core.Points
  
- themeFc =  sRGB24read "#FFFFFF"
- themeBc =  sRGB24read "#000000"
- themeLc =  blue
+ --themeFc =  sRGB24read "#F88017"
+ themeFc =  white
+ themeBc =  sRGB24read "#585858"
+ themeLc =  sRGB24read "#585858"
  
  
+ favorite =  stroke (star (StarSkip 2) (regPoly 5 1))
+ 
+ plusIcon = stroke ( fromVertices plusPath) # scale (8/9)
+        where  plusPath =  concat . take 4 . iterate (rotateBy (-1/4)) $ spike 
+               spike = map p2 [(-1/4, 1/4), (-1/4,3/4), (1/4, 3/4), (1/4, 1/4)]
+         
+ minusIcon = rect (3/2) (1/2) # scale (3/4)  
  rightTriangle size = eqTriangle 1 # rotateBy (3/4)                                      
  
                       
  leftArrow = polygon with { polyType   = PolySides [ 1/4 :: CircleFrac,
-                                                  -1/4 :: CircleFrac,
-                                                  3/8 :: CircleFrac,
-                                                  1/4 :: CircleFrac,
-                                                  3/8 :: CircleFrac
-                                                  ]
-                                                [ 1/3 ,
-                                                 1 ,
-                                                  a,
-                                                   eqSide,
-                                                    eqSide,
-                                                     a],
-                               polyOrient = OrientV } # alignX 0
+                                                    -1/4 :: CircleFrac,
+                                                    3/8 :: CircleFrac,
+                                                    1/4 :: CircleFrac,
+                                                    3/8 :: CircleFrac
+                                                   ]
+                                           [ 1/3 , 1 , a, eqSide, eqSide, a],
+                               polyOrient = OrientV } # alignX 0 # scale 1.2
           where a = 1 /6
                 eqSide =  2 * sqrt ( 1/3 *a) 
  
@@ -33,6 +37,7 @@
                                                # fc themeFc
                                                # centerXY
                                                # lw 0.03
+                                               # scale 1.2
         where                                            
               h = 3/4
               w = 1
@@ -72,19 +77,29 @@
               ( "down_arrow", downArrow),
               ( "next", stepNext),
               ( "previous", stepPrevious),
+              ( "stepUp", stepUp),
+              ( "stepDown", stepDown),
               ( "right_triangle", play),
               ( "stop", block),
               ( "home", home),
-              ( "stepUp", stepUp),
-              ( "stepDown", stepDown),
               ( "end", endIcon),
               ( "mail", enveloppe),
+              ( "plus", plusIcon),
+              ( "minus", minusIcon),
+              ( "favorite", favorite),
               ( "fast_forward", fastForward),
               ( "fast_backward", fastBackward) ]
-
- allIconsArg = map (padIcon 1.1) allIcons
-        where padIcon  x (name, icon)  = (name, (icon # fc themeFc
-                                                     # lc themeFc 
-                                                     <> circle 1 # fc themeBc) # pad x  ) 
  
- main = multiMain allIconsArg
+ backgroundShape = regPoly 6 1 # fc themeBc # scale 1.3
+ backgroundShape' = circle 1 # fc themeBc
+ 
+ allIconsArg = map (padIcon 1.1) allIcons
+        where padIcon  x (name, icon)  = (name, (icon # fc themeFc # lc themeFc 
+                                         <>  backgroundShape') # pad x  ) 
+ iconList = map snd allIconsArg
+ overviewImage = hcat iconList
+ 
+  
+ allIconsFinal = ( "overview", overviewImage) : allIconsArg
+ 
+ main = multiMain allIconsFinal
