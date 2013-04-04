@@ -1,6 +1,6 @@
 set -e 
 #set -x
-FC=${1:-"#7F525D"}
+FC=${1:-"#FFF8C6"}
 BC=${2:-"#737CA1"}
 LC=${3:-"#C9C299"}
 
@@ -34,14 +34,14 @@ for ICON in left_arrow\
             end\
             stepUp\
             stepDown\
-            mail\
             plus\
             favorite\
             zoom_in\
             zoom_out\
             minus        
 do
- callMain 200 200 $FC $BC $LC $ICON
+ callMain 72 72 $FC $BC $FC $ICON
 done
- callMain $((48 * 20)) 48  $FC $BC $LC overview
-eog icons/zoom_in.png
+callMain $((72 * 20)) 72  $FC $BC $LC overview
+callMain 72 72 $FC $BC $LC mail
+eog icons/favorite.png
