@@ -1,7 +1,7 @@
-set -e 
+set -e
 #set -x
-FC=${1:-"#FFF8C6"}
-BC=${2:-"#737CA1"}
+FC=${1:-"#FFFF3D"}
+BC=${2:-"#1B00A1"}
 LC=${3:-"#C9C299"}
 
 
@@ -38,10 +38,11 @@ for ICON in left_arrow\
             favorite\
             zoom_in\
             zoom_out\
-            minus        
+            hart\
+            minus
 do
  callMain 72 72 $FC $BC $FC $ICON
 done
 callMain $((72 * 20)) 72  $FC $BC $LC overview
 callMain 72 72 $FC $BC $LC mail
-eog icons/favorite.png
+eog icons/hart.png

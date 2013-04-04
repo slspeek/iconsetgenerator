@@ -7,6 +7,15 @@ import Diagrams.Core.Points
 import Data.Colour (withOpacity)
 
 
+hart =  stroke (pathFromTrailAt hartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY
+        where c1 = r2 (0.25, 0.2)
+              c2 = r2 (0.5,0)
+              c3 = r2 (0,-0.5)
+              rightCurve = bezier3 c1 c2 c3
+              leftCurve = rightCurve # reflectX
+              hartT :: Trail R2
+              hartT =  fromSegments [leftCurve , reverseSegment rightCurve]
+
 favorite' :: Renderable (Path R2) b => Diagram b R2
 favorite' =  stroke (star (StarSkip 2) (regPoly 5 1))
 
@@ -41,21 +50,21 @@ leftArrow = polygon with { polyType   = PolySides [ 1/4 :: CircleFrac,
 enveloppe :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
 enveloppe themeFc themeLc =  style (mconcat $ map stroke pathList)
          where
-             style = \y -> y # lineJoin LineJoinRound # lc themeLc # fc themeFc # centerXY # lw 0.03 # scale 1.2
-             h = 3/4
-             w = 1
-             ltratio = 1/3
+             style y   = y # lineJoin LineJoinRound # lc themeLc # fc themeFc # centerXY # lw 0.03 # scale 1.2
+             h         = 3/4
+             w         = 1
+             ltratio   = 1/3
              lower_tip = p2 ( w/2, ltratio * h)
              upper_tip = p2 ( w/2, (1 - ltratio ) * h)
              lu_corner = p2  (0, h)
              ru_corner = p2 (w, h)
              lb_corner = p2 (0, 0)
              rb_corner = p2 (w, 0)
-             envList = [lu_corner, ru_corner, rb_corner, lb_corner]
-             flap = fromVertices [lu_corner, lower_tip, ru_corner]
+             envList   = [lu_corner, ru_corner, rb_corner, lb_corner]
+             flap      = fromVertices [lu_corner, lower_tip, ru_corner]
              lowerFlap = fromVertices [lb_corner, upper_tip, rb_corner]
-             env =   close (fromVertices envList)
-             pathList = [ flap, lowerFlap, env]
+             env       =   close (fromVertices envList)
+             pathList  = [ flap, lowerFlap, env]
 
 strutedVrule :: Renderable (Path R2) b => Diagram b R2
 strutedVrule = minusIcon # rotateBy (1/4) # scale 0.9
@@ -132,9 +141,10 @@ zoomIn  =  combineWithLoop  plusIcon
 zoomOut :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
 zoomOut  = combineWithLoop minusIcon
 
-allIcons :: Renderable (Path R2) b => [([Char], Diagram b R2)]
+allIcons :: Renderable (Path R2) b => [(String, Diagram b R2)]
 allIcons = [ ( "right_arrow", rightArrow),
               ( "left_arrow", leftArrow),
+              ( "hart", hart),  
               ( "up_arrow", upArrow),
               ( "down_arrow", downArrow),
               ( "next", stepNext),
@@ -151,15 +161,15 @@ allIcons = [ ( "right_arrow", rightArrow),
               ( "fast_forward", fastForward),
               ( "rewind", fastBackward) ]
 
-mapScd f names = map f' names
+mapScd f = map f' 
         where f' (x,y) = (x, f y)
 
-hardList :: Renderable (Path R2) b => [([Char], Colour Double -> Colour Double -> Diagram b R2)]
+hardList :: Renderable (Path R2) b => [(String, Colour Double -> Colour Double -> Diagram b R2)]
 hardList = [( "zoom_out", zoomOut ),
             ( "mail", enveloppe ),
             ( "zoom_in", zoomIn ) ]
 
-hardToColor :: Renderable (Path R2) b =>  Colour Double -> Colour Double -> [([Char], Diagram b R2)]
+hardToColor :: Renderable (Path R2) b =>  Colour Double -> Colour Double -> [(String, Diagram b R2)]
 hardToColor themeFc themeLc = mapScd (\y -> shadowed' y themeFc themeLc) hardList
 
  -- backgroundShape = (star (StarSkip 2) (regPoly 8 1) ) # stroke # fc themeBc # scale 1.3
@@ -168,11 +178,18 @@ backgroundShape' :: (PathLike b, Transformable b, HasStyle b, V b ~ R2) =>
 backgroundShape' color lineC = circle 1 # fc color # lc lineC
 
 shadowDirection = r2 (0.05, -0.05)
-shadowed icon fC = centerXY (icon <> lc dC (fc dC (translate shadowDirection icon)))
+shadowed icon fC = centerX (icon <> lc dC (fc dC (translate shadowDirection icon)))
         where dC = darken 0.3 fC
-shadowed' icon fC lC = centerXY (icon fC lC <> translate shadowDirection (icon dC dC))
+shadowed' icon fC lC = centerX (icon fC lC <> translate shadowDirection (icon dC dC))
         where dC = darken 0.3 fC
 
+setOnBackground :: (Semigroup m, PathLike (QDiagram b R2 m), Backend b R2,
+                                   Monoid m) =>
+                                  t
+                                  -> Colour Double
+                                  -> Colour Double
+                                  -> [(t1, QDiagram b R2 m)]
+                                  -> [(t1, QDiagram b R2 m)]
 setOnBackground fC bC lineC = map (padIcon 1.1)
         where padIcon  x (name, icon)  = (name , (icon <> backgroundShape' bC lineC) # lw 0.01 # pad x  )
 
@@ -180,14 +197,14 @@ setColorOnAll fillColor lineColor = mapScd (\y -> shadowed y fillColor # lc line
 
 prepareAll
   :: (Renderable (Path R2) b, Backend b R2) =>
-     String -> String -> String -> [([Char], QDiagram b R2 Any)]
+     String -> String -> String -> [(String, QDiagram b R2 Any)]
 prepareAll fC bC lC =  ( "overview", overviewImage) : allPadded
         where   fcC = sRGB24read fC
                 bgC = sRGB24read bC
                 lcC = sRGB24read lC
                 simpleIcons = setColorOnAll fcC lcC allIcons
                 hardIcons = hardToColor fcC lcC
-                allList = concat [simpleIcons, hardIcons]
+                allList = simpleIcons ++ hardIcons
                 allPadded = setOnBackground fcC bgC lcC allList
                 iconList = map snd allPadded
                 overviewImage = hcat iconList
