@@ -7,6 +7,7 @@ import Diagrams.Core.Points
 import Data.Colour (withOpacity)
 
 
+hart :: Renderable (Path R2) b => Diagram b R2
 hart =  stroke (pathFromTrailAt hartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY
         where c1 = r2 (0.25, 0.2)
               c2 = r2 (0.5,0)
@@ -19,6 +20,7 @@ hart =  stroke (pathFromTrailAt hartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # cent
 favorite' :: Renderable (Path R2) b => Diagram b R2
 favorite' =  stroke (star (StarSkip 2) (regPoly 5 1))
 
+favorite :: Renderable (Path R2) b => Diagram b R2
 favorite = favorite'
 
 crossy :: Renderable (Path R2) b => Double -> Diagram b R2
@@ -142,26 +144,27 @@ zoomOut :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b
 zoomOut  = combineWithLoop minusIcon
 
 allIcons :: Renderable (Path R2) b => [(String, Diagram b R2)]
-allIcons = [ ( "right_arrow", rightArrow),
-              ( "left_arrow", leftArrow),
-              ( "hart", hart),  
-              ( "up_arrow", upArrow),
-              ( "down_arrow", downArrow),
-              ( "next", stepNext),
-              ( "previous", stepPrevious),
-              ( "stepUp", stepUp),
-              ( "stepDown", stepDown),
-              ( "right_triangle", play),
-              ( "stop", block),
-              ( "home", home),
-              ( "end", endIcon),
-              ( "plus", plusIcon),
-              ( "minus", minusIcon),
-              ( "favorite", favorite),
-              ( "fast_forward", fastForward),
-              ( "rewind", fastBackward) ]
+allIcons = [  ("right_arrow", rightArrow),
+              ("left_arrow", leftArrow),
+              ("hart", hart),
+              ("up_arrow", upArrow),
+              ("down_arrow", downArrow),
+              ("next", stepNext),
+              ("previous", stepPrevious),
+              ("stepUp", stepUp),
+              ("stepDown", stepDown),
+              ("right_triangle", play),
+              ("stop", block),
+              ("home", home),
+              ("end", endIcon),
+              ("plus", plusIcon),
+              ("minus", minusIcon),
+              ("favorite", favorite),
+              ("fast_forward", fastForward),
+              ("rewind", fastBackward) ]
 
-mapScd f = map f' 
+mapScd :: (t -> t2) -> [(t1, t)] -> [(t1, t2)]
+mapScd f = map f'
         where f' (x,y) = (x, f y)
 
 hardList :: Renderable (Path R2) b => [(String, Colour Double -> Colour Double -> Diagram b R2)]
@@ -177,35 +180,38 @@ backgroundShape' :: (PathLike b, Transformable b, HasStyle b, V b ~ R2) =>
      Colour Double -> Colour Double -> b
 backgroundShape' color lineC = circle 1 # fc color # lc lineC
 
+shadowDirection :: R2
 shadowDirection = r2 (0.05, -0.05)
+
+shadowed :: (Semigroup a, Alignable a, Transformable a, HasStyle a, V a ~ R2) =>
+    a -> Colour Double -> a
 shadowed icon fC = centerX (icon <> lc dC (fc dC (translate shadowDirection icon)))
         where dC = darken 0.3 fC
+
+
 shadowed' icon fC lC = centerX (icon fC lC <> translate shadowDirection (icon dC dC))
         where dC = darken 0.3 fC
 
 setOnBackground :: (Semigroup m, PathLike (QDiagram b R2 m), Backend b R2,
                                    Monoid m) =>
-                                  t
-                                  -> Colour Double
-                                  -> Colour Double
-                                  -> [(t1, QDiagram b R2 m)]
-                                  -> [(t1, QDiagram b R2 m)]
-setOnBackground fC bC lineC = map (padIcon 1.1)
-        where padIcon  x (name, icon)  = (name , (icon <> backgroundShape' bC lineC) # lw 0.01 # pad x  )
+    Colour Double -> Colour Double -> [(t1, QDiagram b R2 m)] -> [(t1, QDiagram b R2 m)]
+setOnBackground bC lC = mapScd (\icon -> (icon <> backgroundShape' bC lC) # lw 0.01 # pad 1.1)
 
-setColorOnAll fillColor lineColor = mapScd (\y -> shadowed y fillColor # lc lineColor # fc fillColor)
+setColorOnAll :: (Semigroup t2, Alignable t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>
+    Colour Double -> Colour Double -> [(t1, t2)] -> [(t1, t2)]
+setColorOnAll fC lC = mapScd (\y -> shadowed y fC # lc lC # fc fC)
 
 prepareAll
   :: (Renderable (Path R2) b, Backend b R2) =>
      String -> String -> String -> [(String, QDiagram b R2 Any)]
-prepareAll fC bC lC =  ( "overview", overviewImage) : allPadded
-        where   fcC = sRGB24read fC
-                bgC = sRGB24read bC
-                lcC = sRGB24read lC
-                simpleIcons = setColorOnAll fcC lcC allIcons
-                hardIcons = hardToColor fcC lcC
+prepareAll f b l =  ( "overview", overviewImage) : allPadded
+        where   fC = sRGB24read f
+                bC = sRGB24read b
+                lC = sRGB24read l
+                simpleIcons = setColorOnAll fC lC allIcons
+                hardIcons = hardToColor fC lC
                 allList = simpleIcons ++ hardIcons
-                allPadded = setOnBackground fcC bgC lcC allList
+                allPadded = setOnBackground bC lC allList
                 iconList = map snd allPadded
                 overviewImage = hcat iconList
 
