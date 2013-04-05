@@ -6,6 +6,13 @@ import Data.Colour.SRGB
 import Diagrams.Core.Points
 import Data.Colour (withOpacity)
 
+gradExample :: (PathLike a, Transformable a, HasStyle a, V a ~ R2) =>
+    b -> b1 -> a
+gradExample  = const $  const $ mconcat coloredCircles
+        where circles = take count $ iterate (scale 0.99) (circle 1)
+              colors = take count $ iterate (blend 0.01 blue) red
+              coloredCircles = [ lc color circle| (color, circle) <- zip colors circles]
+              count = 200
 
 hart :: Renderable (Path R2) b => Diagram b R2
 hart =  stroke (pathFromTrailAt hartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY
@@ -38,16 +45,28 @@ minusIcon = rect (3/2) (1/2) # scale (3/4)
 rightTriangle :: Renderable (Path R2) b => Diagram b R2
 rightTriangle = eqTriangle 1 # rotateBy (3/4)
 
-leftArrow :: (PathLike p, V p ~ R2) => p
-leftArrow = polygon with { polyType   = PolySides [ 1/4 :: CircleFrac,
+leftArrow' headFactor = polygon with { polyType   = PolySides [ 1/4 :: CircleFrac,
                                                    -1/4 :: CircleFrac,
                                                     3/8 :: CircleFrac,
                                                     1/4 :: CircleFrac,
                                                     3/8 :: CircleFrac ]
                                            [1/3 , 1 , a, eqSide, eqSide, a],
-                           polyOrient = OrientV }
-          where a = 1 /6
+                        polyOrient = OrientV }
+          where a = headFactor
                 eqSide =  2 * sqrt ( 1/3 *a)
+
+leftArrow :: (PathLike p, V p ~ R2) => p
+leftArrow = leftArrow' (1/6)
+
+pencil w h pointL = centerXY $ stroke pencilPath # lineJoin LineJoinRound
+    where leftCurveS = bezier3 (r2(b,0)) (r2(-b,-b)) (r2(0, h))
+          b = h/4
+          lineS = Linear (r2(w,0))
+          pointS = Linear (r2(pointL, -(h/2)))
+          rightCurveS = reverseSegment leftCurveS
+          pencilPath = close $ fromSegments [leftCurveS, lineS, pointS, reverseSegment $ reflectY pointS]
+
+pencilExample  = pencil 1.5 0.2 0.3 # rotateBy (-3/8)
 
 enveloppe :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
 enveloppe themeFc themeLc =  style (mconcat $ map stroke pathList)
@@ -143,7 +162,6 @@ zoomIn  =  combineWithLoop  plusIcon
 zoomOut :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
 zoomOut  = combineWithLoop minusIcon
 
-allIcons :: Renderable (Path R2) b => [(String, Diagram b R2)]
 allIcons = [  ("right_arrow", rightArrow),
               ("left_arrow", leftArrow),
               ("hart", hart),
@@ -160,64 +178,91 @@ allIcons = [  ("right_arrow", rightArrow),
               ("plus", plusIcon),
               ("minus", minusIcon),
               ("favorite", favorite),
+              ("pencilExample", pencilExample),
               ("fast_forward", fastForward),
               ("rewind", fastBackward) ]
+
+makeColorable
+  :: HasStyle b => b -> Colour Double -> Colour Double -> b
+makeColorable icon fC lC = icon # fc fC # lc lC
 
 mapScd :: (t -> t2) -> [(t1, t)] -> [(t1, t2)]
 mapScd f = map f'
         where f' (x,y) = (x, f y)
 
-hardList :: Renderable (Path R2) b => [(String, Colour Double -> Colour Double -> Diagram b R2)]
-hardList = [( "zoom_out", zoomOut ),
-            ( "mail", enveloppe ),
-            ( "zoom_in", zoomIn ) ]
+colorableList
+  :: Renderable (Path R2) b =>
+     [(String, Colour Double -> Colour Double -> Diagram b R2)]
+colorableList = [( "zoom_out", zoomOut ),
+                ( "mail", enveloppe ),
+                ("gradExample", gradExample),
+                ( "zoom_in", zoomIn ) ]
 
-hardToColor :: Renderable (Path R2) b =>  Colour Double -> Colour Double -> [(String, Diagram b R2)]
-hardToColor themeFc themeLc = mapScd (\y -> shadowed' y themeFc themeLc) hardList
+totalIconList
+  :: Renderable (Path R2) b =>
+     [(String, Colour Double -> Colour Double -> Diagram b R2)]
+totalIconList = mapScd makeColorable allIcons ++ colorableList
+
+themeIcons
+  :: (Fractional a, Semigroup t2, Alignable t2, Transformable t2,
+      ColourOps f, V t2 ~ R2) =>
+     f a -> f a -> String -> [(t1, f a -> f a -> t2)] -> [(t1, t2)]
+themeIcons themeFc themeLc shadow = mapScd (\y -> shadowedCond y themeFc themeLc shadow)
 
  -- backgroundShape = (star (StarSkip 2) (regPoly 8 1) ) # stroke # fc themeBc # scale 1.3
 backgroundShape' :: (PathLike b, Transformable b, HasStyle b, V b ~ R2) =>
      Colour Double -> Colour Double -> b
-backgroundShape' color lineC = circle 1 # fc color # lc lineC
+backgroundShape' color lineC = circle 1  # fc color # lw 0
 
 shadowDirection :: R2
 shadowDirection = r2 (0.05, -0.05)
 
-shadowed :: (Semigroup a, Alignable a, Transformable a, HasStyle a, V a ~ R2) =>
-    a -> Colour Double -> a
-shadowed icon fC = centerX (icon <> lc dC (fc dC (translate shadowDirection icon)))
-        where dC = darken 0.3 fC
-
-
+shadowed'
+  :: (Fractional a, Semigroup a1, Alignable a1, Transformable a1,
+      ColourOps f, V a1 ~ R2) =>
+     (f a -> f a -> a1) -> f a -> f a -> a1
 shadowed' icon fC lC = centerX (icon fC lC <> translate shadowDirection (icon dC dC))
         where dC = darken 0.3 fC
 
-setOnBackground :: (Semigroup m, PathLike (QDiagram b R2 m), Backend b R2,
-                                   Monoid m) =>
-    Colour Double -> Colour Double -> [(t1, QDiagram b R2 m)] -> [(t1, QDiagram b R2 m)]
-setOnBackground bC lC = mapScd (\icon -> (icon <> backgroundShape' bC lC) # lw 0.01 # pad 1.1)
+shadowedCond
+  :: (Fractional a, Semigroup a1, Alignable a1, Transformable a1,
+      ColourOps f, V a1 ~ R2) =>
+     (f a -> f a -> a1) -> f a -> f a -> String -> a1
+shadowedCond icon fC lC s = if s == "True" then
+                                shadowed' icon fC lC
+                            else
+                                icon fC lC # centerXY
 
-setColorOnAll :: (Semigroup t2, Alignable t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>
+setOnBackground ::  (PathLike t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>
     Colour Double -> Colour Double -> [(t1, t2)] -> [(t1, t2)]
-setColorOnAll fC lC = mapScd (\y -> shadowed y fC # lc lC # fc fC)
+setOnBackground bC lC = mapScd (\icon -> icon <> backgroundShape' bC lC)
 
-prepareAll
-  :: (Renderable (Path R2) b, Backend b R2) =>
-     String -> String -> String -> [(String, QDiagram b R2 Any)]
-prepareAll f b l =  ( "overview", overviewImage) : allPadded
+centerInCircle = mapScd (\icon -> icon <> (circle 1 # lw 0))
+
+prepareAll ::  (Renderable (Path R2) b, Backend b R2) =>
+    String -> String -> String -> String -> String -> [(String, QDiagram b R2 Any)]
+prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
         where   fC = sRGB24read f
                 bC = sRGB24read b
                 lC = sRGB24read l
-                simpleIcons = setColorOnAll fC lC allIcons
-                hardIcons = hardToColor fC lC
-                allList = simpleIcons ++ hardIcons
-                allPadded = setOnBackground bC lC allList
-                iconList = map snd allPadded
-                overviewImage = hcat iconList
+                themedIcons = themeIcons fC lC shadow totalIconList
+                onBackground = (if background == "True"  then
+                                setOnBackground bC lC themedIcons
+                            else
+                                centerInCircle themedIcons)
+                padList  = mapScd (pad 1.1)
+                allPadded = padList onBackground
+                noBG =  centerInCircle $ themeIcons fC lC "True" totalIconList
+                noBGnoSh =  centerInCircle $ themeIcons fC lC "False" totalIconList
+                noShadow = setOnBackground bC lC $ themeIcons fC lC "False" totalIconList
+                overviewImage = vcat $ map hcat $ (map (map snd)) $ map padList [noBGnoSh,noBG, noShadow, onBackground]
+
 
 main :: IO ()
 main = do
        fcString <- getLine
        bgString <- getLine
        lcString <- getLine
-       multiMain  (prepareAll fcString bgString lcString)
+       shadow <- getLine
+       background <- getLine
+       multiMain  (prepareAll fcString bgString lcString shadow background)

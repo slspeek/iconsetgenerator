@@ -1,5 +1,6 @@
 set -e
 #set -x
+./clean.sh
 FC=${1:-"#FFFF3D"}
 BC=${2:-"#1B00A1"}
 LC=${3:-"#C9C299"}
@@ -12,7 +13,9 @@ function callMain () {
 	BG=$4
 	LINE=$5
 	ICON=$6
-	echo -e "$FILL\n$BG\n$LINE"|dist/build/Iconsetgenerator/Iconsetgenerator --select=$ICON -o icons/$ICON.png -w $WIDTH -h $HEIGHT 
+    BACKGROUND=${7:-True}
+    SHADOW=${8:-True}
+	echo -e "$FILL\n$BG\n$LINE\n$SHADOW\n$BACKGROUND"|dist/build/Iconsetgenerator/Iconsetgenerator --select=$ICON -o icons/$ICON.png -w $WIDTH -h $HEIGHT 
 }
 
 mkdir -p icons
@@ -21,6 +24,8 @@ cabal clean
 cabal configure
 cabal build
 for ICON in left_arrow\
+            gradExample\
+            pencilExample\
             right_arrow\
             up_arrow\
             down_arrow\
@@ -41,8 +46,9 @@ for ICON in left_arrow\
             hart\
             minus
 do
- callMain 72 72 $FC $BC $FC $ICON
+ callMain 256 256 $FC $BC $FC $ICON
 done
-callMain $((72 * 20)) 72  $FC $BC $LC overview
-callMain 72 72 $FC $BC $LC mail
-eog icons/hart.png
+callMain $((256 * 20)) $(( 3 * 256))  $FC $BC $FC overview
+callMain 256 256 $FC $BC $LC mail
+callMain 256 256 $FC $BC $LC pencilExample True False 
+eog icons/pencilExample.png
