@@ -25,7 +25,7 @@ cabal configure
 cabal build
 for ICON in left_arrow\
             gradExample\
-            pencilExample\
+            pencil\
             right_arrow\
             up_arrow\
             down_arrow\
@@ -43,12 +43,14 @@ for ICON in left_arrow\
             favorite\
             zoom_in\
             zoom_out\
-            hart\
+            heart\
+            running\
+            gear\
             minus
 do
  callMain 256 256 $FC $BC $FC $ICON
 done
-callMain $((256 * 20)) $(( 3 * 256))  $FC $BC $FC overview
+callMain $((256 * 20)) $(( 3 * 256))  $FC $BC $LC overview
 callMain 256 256 $FC $BC $LC mail
 callMain 256 256 $FC $BC $LC pencilExample True False 
-eog icons/pencilExample.png
+eog icons/gear.png

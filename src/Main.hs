@@ -5,6 +5,27 @@ import Diagrams.Backend.Cairo.CmdLine
 import Data.Colour.SRGB
 import Diagrams.Core.Points
 import Data.Colour (withOpacity)
+gear :: Renderable (Path R2) b => Double -> Diagram b R2
+gear teeth =(stroke (fromVertices plusPath  <> circle 0.8)) # fillRule EvenOdd # scale 0.666666
+       where  plusPath =  concat . take (floor teeth) . iterate (rotateBy (-angle)) $ spike
+              angle = CircleFrac (1/teeth)
+              a = pi / teeth 
+              th = 1/4
+              spike = map p2 [(-a, 1), (-(2/3) * a,1 + (th*th)), (-(1/3)* a, 1+th), (a/3, 1 + th), ((2/3)*a,1+(th^2)), (a,1)]
+
+gearExample = centerXY $ beside (r2(1,1)) (scale 0.6 (gear 12)) (scale 0.4 (gear 8))
+
+running :: Renderable (Path R2) b => Diagram b R2
+running = centerXY $ scale (1/56) $ stroke $ path <> (circle 8 # translate (r2(73, 87)))
+        where 
+              path = close $ fromVertices points
+              points = map  p2 [(54, 5),(64, 3),(70, 35),
+                       (57, 49), (72,65),(82,56),(99,73),
+                       (95,78),(83,67),(71,78),(65,80),
+                       (43,80), (27,62), (32, 56), (47, 73),
+                       (54,72),(26,39),(2, 39), (2, 29), 
+                       (33,30),(45,44), (59,30)  ]
+
 
 gradExample :: (PathLike a, Transformable a, HasStyle a, V a ~ R2) =>
     b -> b1 -> a
@@ -14,15 +35,15 @@ gradExample  = const $  const $ mconcat coloredCircles
               coloredCircles = [ lc color circle| (color, circle) <- zip colors circles]
               count = 200
 
-hart :: Renderable (Path R2) b => Diagram b R2
-hart =  stroke (pathFromTrailAt hartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY
+heart :: Renderable (Path R2) b => Diagram b R2
+heart =  stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY
         where c1 = r2 (0.25, 0.2)
               c2 = r2 (0.5,0)
               c3 = r2 (0,-0.5)
               rightCurve = bezier3 c1 c2 c3
               leftCurve = rightCurve # reflectX
-              hartT :: Trail R2
-              hartT =  fromSegments [leftCurve , reverseSegment rightCurve]
+              heartT :: Trail R2
+              heartT =  fromSegments [leftCurve , reverseSegment rightCurve]
 
 favorite' :: Renderable (Path R2) b => Diagram b R2
 favorite' =  stroke (star (StarSkip 2) (regPoly 5 1))
@@ -100,10 +121,10 @@ downArrow :: Renderable (Path R2) b => Diagram b R2
 downArrow = upArrow # rotateBy (1/2)
 
 play :: Renderable (Path R2) b => Diagram b R2
-play = rightTriangle
+play = hrule 0.2 # lw 0 ||| rightTriangle
 
 stepNext :: Renderable (Path R2) b => Diagram b R2
-stepNext = (play ||| strutedVrule) # alignX 0
+stepNext = (rightTriangle ||| strutedVrule) # alignX 0
 
 stepPrevious :: Renderable (Path R2) b => Diagram b R2
 stepPrevious = stepNext # reflectX
@@ -121,7 +142,7 @@ fastForward :: Renderable (Path R2) b => Diagram b R2
 fastForward = (rightTriangle # alignR ||| rightTriangle) # scale (3/4)
 
 endIcon :: Renderable (Path R2) b => Diagram b R2
-endIcon = (play ||| stepNext) # scale (3/4) # alignX 0
+endIcon = (rightTriangle ||| stepNext) # scale (3/4) # alignX 0
 
 home ::  Renderable (Path R2) b => Diagram b R2
 home = endIcon # reflectX
@@ -162,9 +183,10 @@ zoomIn  =  combineWithLoop  plusIcon
 zoomOut :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
 zoomOut  = combineWithLoop minusIcon
 
-allIcons = [  ("right_arrow", rightArrow),
+allIcons = [  ("running", running),
+              ("right_arrow", rightArrow),
               ("left_arrow", leftArrow),
-              ("hart", hart),
+              ("heart", heart),
               ("up_arrow", upArrow),
               ("down_arrow", downArrow),
               ("next", stepNext),
@@ -178,7 +200,8 @@ allIcons = [  ("right_arrow", rightArrow),
               ("plus", plusIcon),
               ("minus", minusIcon),
               ("favorite", favorite),
-              ("pencilExample", pencilExample),
+              ("pencil", pencilExample),
+              ("gear", gearExample),
               ("fast_forward", fastForward),
               ("rewind", fastBackward) ]
 

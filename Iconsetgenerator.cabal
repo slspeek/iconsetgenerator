@@ -1,6 +1,6 @@
 name:           Iconsetgenerator
 version:        0.1
-cabal-version:  >=1.2
+cabal-version:  >=1.4
 build-type:     Simple
 author:         steven
 license:        GPL-3
