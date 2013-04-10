@@ -1,13 +1,16 @@
-{-# LANGUAGE NoMonomorphismRestriction, TypeFamilies, FlexibleContexts, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts          #-}
+{-# LANGUAGE MultiParamTypeClasses     #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE TypeFamilies              #-}
 
-import Diagrams.Prelude
-import Diagrams.Backend.Cairo.CmdLine
-import Data.Colour.SRGB
-import Diagrams.Core.Points
-import Data.Colour (withOpacity)
-import Diagrams.TwoD.Arc
+import           Data.Colour                    (withOpacity)
+import           Data.Colour.SRGB
+import           Diagrams.Backend.Cairo.CmdLine
+import           Diagrams.Core.Points
+import           Diagrams.Prelude
+import           Diagrams.TwoD.Arc
 
-radioWaves a n = (mconcat waves) # fcA transparent 
+radioWaves a n = (mconcat waves) # fcA transparent
        where   waves = [ arc' r 0 a | r <- [(1/n),(2/n)..1]]
 
 rssIcon = (radioWaves (1/4::CircleFrac)  3) # lineCap LineCapRound # lw 0.1 # scale 0.8 # translate (-r2(0.25,0.25))
@@ -18,7 +21,7 @@ key =  (stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0))))) # 
              innerCircle =  circle 0.3
              arcTrail = arcT (a :: CircleFrac) (-a :: CircleFrac)
              handleTopLineT = fromOffsets [r2(-b,b), r2(-d,0)]
-             handleBottomLineT = fromOffsets $ [r2(d-2*c*b-b,0), r2(b,b)] ++ mconcat ( take c (repeat [r2(b,-b),r2(b,b)])) 
+             handleBottomLineT = fromOffsets $ [r2(d-2*c*b-b,0), r2(b,b)] ++ mconcat ( take c (repeat [r2(b,-b),r2(b,b)]))
              c = 3
              b= 0.23
              fullTrail :: Trail R2
@@ -30,7 +33,7 @@ gear :: Renderable (Path R2) b => Double -> Diagram b R2
 gear teeth =(stroke (fromVertices plusPath  <> circle 0.8)) # fillRule EvenOdd # scale 0.666666
        where  plusPath =  concat . take (floor teeth) . iterate (rotateBy (-angle)) $ spike
               angle = CircleFrac (1/teeth)
-              a = pi / teeth 
+              a = pi / teeth
               th = 1/4
               spike = map p2 [(-a, 1), (-(2/3) * a,1 + (th*th)), (-(1/3)* a, 1+th), (a/3, 1 + th), ((2/3)*a,1+(th^2)), (a,1)]
 
@@ -38,13 +41,13 @@ gearExample = centerXY $ beside (r2(1,1)) (scale 0.6 (gear 12)) (scale 0.4 (gear
 
 running :: Renderable (Path R2) b => Diagram b R2
 running = centerXY $ scale (1/56) $ stroke $ path <> (circle 8 # translate (r2(73, 87)))
-        where 
+        where
               path = close $ fromVertices points
               points = map  p2 [(54, 5),(64, 3),(70, 35),
                        (57, 49), (72,65),(82,56),(99,73),
                        (95,78),(83,67),(71,78),(65,80),
                        (43,80), (27,62), (32, 56), (47, 73),
-                       (54,72),(26,39),(2, 39), (2, 29), 
+                       (54,72),(26,39),(2, 39), (2, 29),
                        (33,30),(45,44), (59,30)  ]
 
 
@@ -186,7 +189,7 @@ loop =  (stroke (innerCircle <> (handlePath # moveOriginTo endP) )) # fillRule E
 
 combineWithLoop diagram = ((diagram # rotateBy (3/8:: CircleFrac) # scale 0.8
                                                   <>
-                                            loop) # rotateBy (-3/8:: CircleFrac))# centerXY # scale 0.5 
+                                            loop) # rotateBy (-3/8:: CircleFrac))# centerXY # scale 0.5
 
 
 zoomIn  =  combineWithLoop  plusIcon
@@ -195,8 +198,8 @@ zoomOut  = combineWithLoop minusIcon
 
 allIcons = [  ("running", running),
               ("gear", gearExample),
-              ("rss", rssIcon),  
-              ("key", key),  
+              ("rss", rssIcon),
+              ("key", key),
               ("heart", heart),
               ("favorite", favorite),
               ("pencil", pencilExample),
@@ -244,7 +247,7 @@ backgroundShape' color lineC = circle 1  # fc color # lw 0
 shadowDirection :: R2
 shadowDirection = r2 (0.05, -0.05)
 
-shadowed' icon fC lC = (icon fC lC <> translate shadowDirection (icon dC dC)) # moveOriginBy (0.5 * shadowDirection)
+shadowed' icon fC lC = (icon fC lC <> translate shadowDirection (icon dC dC)) # moveOriginBy (-0.5 * shadowDirection)
         where dC = darken 0.3 fC
 
 shadowedCond icon fC lC s = if s == "True" then
