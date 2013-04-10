@@ -26,6 +26,8 @@ cabal build
 for ICON in left_arrow\
             gradExample\
             pencil\
+            rss\
+            key\
             right_arrow\
             up_arrow\
             down_arrow\
@@ -53,4 +55,4 @@ done
 callMain $((256 * 20)) $(( 3 * 256))  $FC $BC $LC overview
 callMain 256 256 $FC $BC $LC mail
 callMain 256 256 $FC $BC $LC pencilExample True False 
-eog icons/gear.png
+eog icons/rss.png

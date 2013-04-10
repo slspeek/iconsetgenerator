@@ -1,10 +1,31 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE NoMonomorphismRestriction, TypeFamilies, FlexibleContexts, MultiParamTypeClasses #-}
 
 import Diagrams.Prelude
 import Diagrams.Backend.Cairo.CmdLine
 import Data.Colour.SRGB
 import Diagrams.Core.Points
 import Data.Colour (withOpacity)
+import Diagrams.TwoD.Arc
+
+radioWaves a n = (mconcat waves) # fcA transparent 
+       where   waves = [ arc' r 0 a | r <- [(1/n),(2/n)..1]]
+
+rssIcon = (radioWaves (1/4::CircleFrac)  3) # lineCap LineCapRound # lw 0.1 # scale 0.8 # translate (-r2(0.25,0.25))
+
+key ::  Renderable (Path R2) b => Diagram b R2
+key =  (stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0))))) # fillRule EvenOdd # scale 0.40 # centerXY
+       where a  = 1/20
+             innerCircle =  circle 0.3
+             arcTrail = arcT (a :: CircleFrac) (-a :: CircleFrac)
+             handleTopLineT = fromOffsets [r2(-b,b), r2(-d,0)]
+             handleBottomLineT = fromOffsets $ [r2(d-2*c*b-b,0), r2(b,b)] ++ mconcat ( take c (repeat [r2(b,-b),r2(b,b)])) 
+             c = 3
+             b= 0.23
+             fullTrail :: Trail R2
+             fullTrail = mconcat [handleTopLineT ,arcTrail, handleBottomLineT]
+             d = 2
+             handlePath = close $ pathFromTrail fullTrail
+
 gear :: Renderable (Path R2) b => Double -> Diagram b R2
 gear teeth =(stroke (fromVertices plusPath  <> circle 0.8)) # fillRule EvenOdd # scale 0.666666
        where  plusPath =  concat . take (floor teeth) . iterate (rotateBy (-angle)) $ spike
@@ -36,7 +57,7 @@ gradExample  = const $  const $ mconcat coloredCircles
               count = 200
 
 heart :: Renderable (Path R2) b => Diagram b R2
-heart =  stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY
+heart =  stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY # translateY (-0.121212121212121212121212)
         where c1 = r2 (0.25, 0.2)
               c2 = r2 (0.5,0)
               c3 = r2 (0,-0.5)
@@ -121,7 +142,7 @@ downArrow :: Renderable (Path R2) b => Diagram b R2
 downArrow = upArrow # rotateBy (1/2)
 
 play :: Renderable (Path R2) b => Diagram b R2
-play = hrule 0.2 # lw 0 ||| rightTriangle
+play = (hrule 0.2 # lw 0 ||| rightTriangle) # centerXY
 
 stepNext :: Renderable (Path R2) b => Diagram b R2
 stepNext = (rightTriangle ||| strutedVrule) # alignX 0
@@ -150,43 +171,37 @@ home = endIcon # reflectX
 fastBackward :: Renderable (Path R2) b => Diagram b R2
 fastBackward = fastForward # reflectX
 
-innerCircle :: (PathLike p, Transformable p, V p ~ R2) => p
-innerCircle =  circle 0.7
-
-ring :: Path R2
-ring = circle 1 <> innerCircle
-
-coloredRing :: Renderable (Path R2) b => Colour Double -> Diagram b R2
-coloredRing themeFc = stroke ring # fc themeFc # fillRule EvenOdd # lw 0
-
-loop :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
-loop themeFc themeLc =  innerCircle # lc themeLc <> (arcPath <> (handlePath # fc themeFc))  <> coloredRing themeFc
+loop =  (stroke (innerCircle <> (handlePath # moveOriginTo endP) )) # fillRule EvenOdd
        where a  = 1/40
-             arcPath = arc (a :: CircleFrac) (-a :: CircleFrac)
-             allArcPoints = concat (pathVertices arcPath)
-             endP = head allArcPoints
-             startP = last allArcPoints
+             innerCircle =  circle 0.7
+             arcTrail = arcT (a :: CircleFrac) (-a :: CircleFrac)
+             handleTopLineT = fromOffsets [r2(-d,0)]
+             handleBottomLineT = fromOffsets [r2(d,0)]
+             fullTrail :: Trail R2
+             fullTrail = mconcat [handleTopLineT ,arcTrail, handleBottomLineT]
              d = 1.5
-             handleTop = endP # translateX d
-             handleBottom = startP # translateX d
-             handlePath = fromVertices [endP, handleTop, handleBottom, startP]
+             handlePath = close $ pathFromTrail fullTrail
+             allPoints = concat (pathVertices handlePath)
+             endP = (last allPoints)# scale 0.5 # translate (r2(-(d+1),0))
 
-combineWithLoop :: Renderable (Path R2) b => Diagram b R2 -> Colour Double -> Colour Double -> Diagram b R2
-combineWithLoop diagram themeFc themeLc = ((diagram # fc themeFc # rotateBy (3/8:: CircleFrac) # scale 0.8
+combineWithLoop diagram = ((diagram # rotateBy (3/8:: CircleFrac) # scale 0.8
                                                   <>
-                                            loop themeFc themeLc) # rotateBy (-3/8:: CircleFrac) # lc themeLc)# centerXY # scale 0.5 
+                                            loop) # rotateBy (-3/8:: CircleFrac))# centerXY # scale 0.5 
 
 
-zoomIn :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
 zoomIn  =  combineWithLoop  plusIcon
 
-zoomOut :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
 zoomOut  = combineWithLoop minusIcon
 
 allIcons = [  ("running", running),
+              ("gear", gearExample),
+              ("rss", rssIcon),  
+              ("key", key),  
+              ("heart", heart),
+              ("favorite", favorite),
+              ("pencil", pencilExample),
               ("right_arrow", rightArrow),
               ("left_arrow", leftArrow),
-              ("heart", heart),
               ("up_arrow", upArrow),
               ("down_arrow", downArrow),
               ("next", stepNext),
@@ -199,9 +214,8 @@ allIcons = [  ("running", running),
               ("end", endIcon),
               ("plus", plusIcon),
               ("minus", minusIcon),
-              ("favorite", favorite),
-              ("pencil", pencilExample),
-              ("gear", gearExample),
+              ("zoom_out", zoomOut ),
+              ("zoom_in" ,zoomIn),
               ("fast_forward", fastForward),
               ("rewind", fastBackward) ]
 
@@ -213,23 +227,13 @@ mapScd :: (t -> t2) -> [(t1, t)] -> [(t1, t2)]
 mapScd f = map f'
         where f' (x,y) = (x, f y)
 
-colorableList
-  :: Renderable (Path R2) b =>
-     [(String, Colour Double -> Colour Double -> Diagram b R2)]
-colorableList = [( "zoom_out", zoomOut ),
-                ( "mail", enveloppe ),
-                ("gradExample", gradExample),
-                ( "zoom_in", zoomIn ) ]
+colorableList = [
+                ( "mail", enveloppe )
+              --  ("gradExample", gradExample)
+                 ]
 
-totalIconList
-  :: Renderable (Path R2) b =>
-     [(String, Colour Double -> Colour Double -> Diagram b R2)]
 totalIconList = mapScd makeColorable allIcons ++ colorableList
 
-themeIcons
-  :: (Fractional a, Semigroup t2, Alignable t2, Transformable t2,
-      ColourOps f, V t2 ~ R2) =>
-     f a -> f a -> String -> [(t1, f a -> f a -> t2)] -> [(t1, t2)]
 themeIcons themeFc themeLc shadow = mapScd (\y -> shadowedCond y themeFc themeLc shadow)
 
  -- backgroundShape = (star (StarSkip 2) (regPoly 8 1) ) # stroke # fc themeBc # scale 1.3
@@ -240,21 +244,13 @@ backgroundShape' color lineC = circle 1  # fc color # lw 0
 shadowDirection :: R2
 shadowDirection = r2 (0.05, -0.05)
 
-shadowed'
-  :: (Fractional a, Semigroup a1, Alignable a1, Transformable a1,
-      ColourOps f, V a1 ~ R2) =>
-     (f a -> f a -> a1) -> f a -> f a -> a1
-shadowed' icon fC lC = centerX (icon fC lC <> translate shadowDirection (icon dC dC))
+shadowed' icon fC lC = (icon fC lC <> translate shadowDirection (icon dC dC)) # moveOriginBy (0.5 * shadowDirection)
         where dC = darken 0.3 fC
 
-shadowedCond
-  :: (Fractional a, Semigroup a1, Alignable a1, Transformable a1,
-      ColourOps f, V a1 ~ R2) =>
-     (f a -> f a -> a1) -> f a -> f a -> String -> a1
 shadowedCond icon fC lC s = if s == "True" then
                                 shadowed' icon fC lC
                             else
-                                icon fC lC # centerXY
+                                icon fC lC -- # centerXY
 
 setOnBackground ::  (PathLike t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>
     Colour Double -> Colour Double -> [(t1, t2)] -> [(t1, t2)]
