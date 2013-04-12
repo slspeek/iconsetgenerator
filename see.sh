@@ -1,9 +1,9 @@
 set -e
 #set -x
 ./clean.sh
-FC=${1:-"#FFFF3D"}
-BC=${2:-"#1B00A1"}
-LC=${3:-"#C9C299"}
+FC=${1:-"#FFA500"}
+BC=${2:-"#008080"}
+LC=${3:-"#C0C0C0"}
 
 
 function callMain () {
