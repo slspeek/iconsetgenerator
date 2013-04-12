@@ -3,6 +3,8 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE TypeFamilies              #-}
 
+module IconsetGenerator.Icons (radioWaves, rssIcon, key, gear, gearExample, running,gradExample, heart, prepareAll) where 
+
 import           Data.Colour                    (withOpacity)
 import           Data.Colour.SRGB
 import           Diagrams.Backend.Cairo.CmdLine
@@ -10,10 +12,26 @@ import           Diagrams.Core.Points
 import           Diagrams.Prelude
 import           Diagrams.TwoD.Arc
 
+leave fC lC = fc fC $ lc lC $ translateX (-0.1) $ centerXY $ scale 0.7 $ arrow <> door fC lC
+        where   arrow = rightArrow #scale 0.8 # translate (r2(-0.9,0))
+
+door fC lC = (openDoor <> doorFrame # translate (r2(x/2 -d , -y/2 - a))) # centerXY
+        where   doorFrame = stroke (rect x y) # fcA transparent # lw 0.03
+                d = 0.2
+                a = 0.03
+                x = 1
+                y = 1.7
+                door = fromOffsets [r2(x-d, -a), r2(0, -y), r2(-x+d, -a)]
+                doorClosed = close door
+                doorKnob = stroke (circle 0.04) # fc (darken 0.1 fC) # translate (r2(d/2, -y/2 -a))
+                openDoor = doorKnob <> stroke doorClosed 
+                 
+                
+
 radioWaves a n = (mconcat waves) # fcA transparent
        where   waves = [ arc' r 0 a | r <- [(1/n),(2/n)..1]]
 
-rssIcon = (radioWaves (1/4::CircleFrac)  3) # lineCap LineCapRound # lw 0.1 # scale 0.8 # translate (-r2(0.25,0.25))
+rssIcon = (circle 0.08 <> radioWaves (1/4::CircleFrac)  3) # lineCap LineCapRound # lw 0.1 # translate (-r2(0.4,0.4))
 
 key ::  Renderable (Path R2) b => Diagram b R2
 key =  (stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0))))) # fillRule EvenOdd # scale 0.40 # centerXY
@@ -21,7 +39,7 @@ key =  (stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0))))) # 
              innerCircle =  circle 0.3
              arcTrail = arcT (a :: CircleFrac) (-a :: CircleFrac)
              handleTopLineT = fromOffsets [r2(-b,b), r2(-d,0)]
-             handleBottomLineT = fromOffsets $ [r2(d-2*c*b-b,0), r2(b,b)] ++ mconcat ( take c (repeat [r2(b,-b),r2(b,b)]))
+             handleBottomLineT = fromOffsets $ [r2(d-2*c*b-2*b,0), r2(b,b)] ++ mconcat ( take c (repeat [r2(b,-b),r2(b,b)])) ++ [r2(b,0)]
              c = 3
              b= 0.23
              fullTrail :: Trail R2
@@ -40,7 +58,7 @@ gear teeth =(stroke (fromVertices plusPath  <> circle 0.8)) # fillRule EvenOdd #
 gearExample = centerXY $ beside (r2(1,1)) (scale 0.6 (gear 12)) (scale 0.4 (gear 8))
 
 running :: Renderable (Path R2) b => Diagram b R2
-running = centerXY $ scale (1/56) $ stroke $ path <> (circle 8 # translate (r2(73, 87)))
+running = translateX (-0.02) $ centerXY $ scale (1/56) $ stroke $ path <> (circle 8 # translate (r2(73, 87)))
         where
               path = close $ fromVertices points
               points = map  p2 [(54, 5),(64, 3),(70, 35),
@@ -60,7 +78,7 @@ gradExample  = const $  const $ mconcat coloredCircles
               count = 200
 
 heart :: Renderable (Path R2) b => Diagram b R2
-heart =  stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY # translateY (-0.121212121212121212121212)
+heart =  stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY # translateY (-0.12)
         where c1 = r2 (0.25, 0.2)
               c2 = r2 (0.5,0)
               c3 = r2 (0,-0.5)
@@ -100,8 +118,8 @@ leftArrow' headFactor = polygon with { polyType   = PolySides [ 1/4 :: CircleFra
           where a = headFactor
                 eqSide =  2 * sqrt ( 1/3 *a)
 
-leftArrow :: (PathLike p, V p ~ R2) => p
-leftArrow = leftArrow' (1/6)
+leftArrow :: (Alignable p, PathLike p, V p ~ R2) => p
+leftArrow = leftArrow' (1/6) # centerXY
 
 pencil w h pointL = centerXY $ stroke pencilPath # lineJoin LineJoinRound
     where leftCurveS = bezier3 (r2(b,0)) (r2(-b,-b)) (r2(0, h))
@@ -231,9 +249,10 @@ mapScd f = map f'
         where f' (x,y) = (x, f y)
 
 colorableList = [
-                ( "mail", enveloppe )
+            ( "mail", enveloppe ),
+            ("leave", leave)
               --  ("gradExample", gradExample)
-                 ]
+                ]
 
 totalIconList = mapScd makeColorable allIcons ++ colorableList
 
@@ -247,7 +266,7 @@ backgroundShape' color lineC = circle 1  # fc color # lw 0
 shadowDirection :: R2
 shadowDirection = r2 (0.05, -0.05)
 
-shadowed' icon fC lC = (icon fC lC <> translate shadowDirection (icon dC dC)) # moveOriginBy (-0.5 * shadowDirection)
+shadowed' icon fC lC = (icon fC lC <> translate shadowDirection (icon dC dC)) ---- # moveOriginBy (0.5 * shadowDirection)
         where dC = darken 0.3 fC
 
 shadowedCond icon fC lC s = if s == "True" then
@@ -278,13 +297,3 @@ prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
                 noBGnoSh =  centerInCircle $ themeIcons fC lC "False" totalIconList
                 noShadow = setOnBackground bC lC $ themeIcons fC lC "False" totalIconList
                 overviewImage = vcat $ map hcat $ (map (map snd)) $ map padList [noBGnoSh,noBG, noShadow, onBackground]
-
-
-main :: IO ()
-main = do
-       fcString <- getLine
-       bgString <- getLine
-       lcString <- getLine
-       shadow <- getLine
-       background <- getLine
-       multiMain  (prepareAll fcString bgString lcString shadow background)

@@ -5,7 +5,7 @@ build-type:     Simple
 author:         steven
 license:        GPL-3
 
-executable Iconsetgenerator
+executable iconset
   build-depends:   
                    base >= 4,
                    diagrams,
@@ -16,9 +16,18 @@ executable Iconsetgenerator
 
   hs-source-dirs:  src
   ghc-options:     -Wall -rtsopts
-  main-is:         Main.hs
+  main-is:         IconsetGenerator/Main.hs
   extensions:      
                    FlexibleContexts, 
                    NoMonomorphismRestriction, 
                    TypeFamilies
 
+Library
+  Build-Depends:     base >= 3 && < 5
+  Exposed-modules:   IconsetGenerator.Icons
+  ghc-options:       -Wall
+  hs-source-dirs:  src
+  extensions:      
+                   FlexibleContexts, 
+                   NoMonomorphismRestriction, 
+                   TypeFamilies

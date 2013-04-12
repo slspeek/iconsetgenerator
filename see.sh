@@ -15,7 +15,7 @@ function callMain () {
 	ICON=$6
     BACKGROUND=${7:-True}
     SHADOW=${8:-True}
-	echo -e "$FILL\n$BG\n$LINE\n$SHADOW\n$BACKGROUND"|dist/build/Iconsetgenerator/Iconsetgenerator --select=$ICON -o icons/$ICON.png -w $WIDTH -h $HEIGHT 
+	echo -e "$FILL\n$BG\n$LINE\n$SHADOW\n$BACKGROUND"|dist/build/iconset/iconset --select=$ICON -o icons/$ICON.png -w $WIDTH -h $HEIGHT 
 }
 
 mkdir -p icons
@@ -24,7 +24,7 @@ cabal clean
 cabal configure
 cabal build
 for ICON in left_arrow\
-            gradExample\
+            leave\
             pencil\
             rss\
             key\
@@ -54,5 +54,5 @@ do
 done
 callMain $((256 * 20)) $(( 3 * 256))  $FC $BC $LC overview
 callMain 256 256 $FC $BC $LC mail
-callMain 256 256 $FC $BC $LC pencilExample True False 
-eog icons/rss.png
+callMain 256 256 $FC $BC $LC leave True False
+eog icons/leave.png
