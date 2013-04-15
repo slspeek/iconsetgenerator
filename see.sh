@@ -1,9 +1,9 @@
 set -e
 #set -x
 ./clean.sh
-FC=${1:-"#FFA500"}
-BC=${2:-"#008080"}
-LC=${3:-"#C0C0C0"}
+FC=${1:-"FFA500"}
+BC=${2:-"008080"}
+LC=${3:-"C0C0C0"}
 
 
 function callMain () {
@@ -15,8 +15,19 @@ function callMain () {
 	ICON=$6
     BACKGROUND=${7:-True}
     SHADOW=${8:-True}
-	echo -e "$FILL\n$BG\n$LINE\n$SHADOW\n$BACKGROUND"|dist/build/iconset/iconset --select=$ICON -o icons/$ICON.png -w $WIDTH -h $HEIGHT 
+    dist/build/iconset/iconset --select=$ICON\
+                               --output icons/$ICON.png\
+                               -w $WIDTH\
+                               -h $HEIGHT\
+                               --maincolor $FC\
+                               --linecolor $LC\
+                               --bgcolor $BG\
+                               --shadow $SHADOW\
+                               --background $BACKGROUND
+
 }
+
+ICONS_EXECUTABLE=dist/build/iconset/iconset
 
 mkdir -p icons
 PATH=$HOME/tools/bin:$PATH
@@ -50,9 +61,8 @@ for ICON in left_arrow\
             gear\
             minus
 do
- callMain 256 256 $FC $BC $FC $ICON
+ $ICONS_EXECUTABLE --width 256 --height 256 --maincolor $FC --bgcolor $BC --linecolor $FC --icon $ICON --shadow --onbackground --output icons/$ICON.png
 done
-callMain $((256 * 20)) $(( 3 * 256))  $FC $BC $LC overview
-callMain 256 256 $FC $BC $LC mail
-callMain 256 256 $FC $BC $LC leave True False
+$ICONS_EXECUTABLE --width $((256 * 20)) --height $(( 3 * 256))  --maincolor $FC --bgcolor $BC --linecolor $LC --icon overview --output icons/overview.png --shadow --onbackground
+$ICONS_EXECUTABLE --width 256 --height 256 --maincolor $FC --bgcolor $BC --linecolor $LC --icon leave --onbackground --output icons/leave.png
 eog icons/leave.png
