@@ -50,15 +50,16 @@ radioWaves :: (Angle a, PathLike b, HasStyle b, V b ~ R2) => a -> Double -> b
 radioWaves a n = mconcat waves # fcA transparent
        where   waves = [ arc' r 0 a | r <- [(1/n),(2/n)..1]]
 
+rssIcon :: (PathLike b, Color c, Transformable b, HasStyle b, V b ~ R2) =>c -> t -> b
 rssIcon mainColor lC = (circle 0.08 <> radioWaves (1/4::CircleFrac)  3) # lineCap LineCapRound # lw 0.1 # translate (-r2(0.4,0.4)) # lineColor mainColor # fillColor mainColor
 
 key ::  Renderable (Path R2) b => Diagram b R2
-key =  (stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0))))) # fillRule EvenOdd # scale 0.40 # centerXY
+key =  stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0)))) # fillRule EvenOdd # scale 0.40 # centerXY
        where a  = 1/20
              innerCircle =  circle 0.3
              arcTrail = arcT (a :: CircleFrac) (-a :: CircleFrac)
              handleTopLineT = fromOffsets [r2(-b,b), r2(-d,0)]
-             handleBottomLineT = fromOffsets $ [r2(d-2*c*b-2*b,0), r2(b,b)] ++ mconcat ( take c (repeat [r2(b,-b),r2(b,b)])) ++ [r2(b,0)]
+             handleBottomLineT = fromOffsets $ [r2(d-2*c*b-2*b,0), r2(b,b)] ++ mconcat (replicate c [r2(b,-b),r2(b,b)]) ++ [r2(b,0)]
              c = 3
              b= 0.23
              fullTrail :: Trail R2
@@ -67,7 +68,7 @@ key =  (stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0))))) # 
              handlePath = close $ pathFromTrail fullTrail
 
 gear :: Renderable (Path R2) b => Double -> Diagram b R2
-gear teeth =(stroke (fromVertices plusPath  <> circle 0.8)) # fillRule EvenOdd # scale 0.666666
+gear teeth = stroke (fromVertices plusPath  <> circle 0.8) # fillRule EvenOdd # scale 0.666666
        where  plusPath =  concat . take (floor teeth) . iterate (rotateBy (-angle)) $ spike
               angle = CircleFrac (1/teeth)
               a = pi / teeth
@@ -129,6 +130,7 @@ minusIcon = rect (3/2) (1/2) # scale (3/4)
 rightTriangle :: Renderable (Path R2) b => Diagram b R2
 rightTriangle = eqTriangle 1 # rotateBy (3/4)
 
+leftArrow' ::  (PathLike p, V p ~ R2) => Double -> p
 leftArrow' headFactor = polygon with { polyType   = PolySides [ 1/4 :: CircleFrac,
                                                    -1/4 :: CircleFrac,
                                                     3/8 :: CircleFrac,
@@ -139,6 +141,7 @@ leftArrow' headFactor = polygon with { polyType   = PolySides [ 1/4 :: CircleFra
           where a = headFactor
                 eqSide =  2 * sqrt ( 1/3 *a)
 
+leftArrow ::  (PathLike b, Alignable b, V b ~ R2) => b
 leftArrow = leftArrow' (1/6) # centerXY
 
 pencil :: Renderable (Path R2) b =>Double -> Double -> Double -> Diagram b R2
@@ -215,7 +218,7 @@ fastBackward :: Renderable (Path R2) b => Diagram b R2
 fastBackward = fastForward # reflectX
 
 loop ::  Renderable (Path R2) b => Diagram b R2
-loop =  (stroke (innerCircle <> (handlePath # moveOriginTo endP) )) # fillRule EvenOdd
+loop =  stroke (innerCircle <> (handlePath # moveOriginTo endP)) # fillRule EvenOdd
        where a  = 1/40
              innerCircle =  circle 0.7
              arcTrail = arcT (a :: CircleFrac) (-a :: CircleFrac)
@@ -226,7 +229,7 @@ loop =  (stroke (innerCircle <> (handlePath # moveOriginTo endP) )) # fillRule E
              d = 1.5
              handlePath = close $ pathFromTrail fullTrail
              allPoints = concat (pathVertices handlePath)
-             endP = (last allPoints)# scale 0.5 # translate (r2(-(d+1),0))
+             endP = last allPoints # scale 0.5 # translate (r2(-(d+1),0))
 
 combineWithLoop :: Renderable (Path R2) b => Diagram b R2 -> Diagram b R2
 combineWithLoop diagram = ((diagram # rotateBy (3/8:: CircleFrac) # scale 0.8
@@ -240,7 +243,7 @@ zoomIn  =  combineWithLoop  plusIcon
 zoomOut ::  Renderable (Path R2) b => Diagram b R2
 zoomOut  = combineWithLoop minusIcon
 
-allIcons ::  Renderable (Path R2) b => [([Char], Diagram b R2)]
+allIcons ::  Renderable (Path R2) b => [(String, Diagram b R2)]
 allIcons = [  ("running", running),
               ("gear", gearExample),
               ("key", key),
@@ -274,7 +277,7 @@ mapScd :: (t -> t2) -> [(t1, t)] -> [(t1, t2)]
 mapScd f = map f'
         where f' (x,y) = (x, f y)
 
-colorableList :: Renderable (Path R2) b =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
+colorableList :: Renderable (Path R2) b =>[(String, Colour Double -> Colour Double -> Diagram b R2)]
 colorableList = [
             ( "mail", enveloppe ),
             ("rss", rssIcon),
@@ -282,7 +285,7 @@ colorableList = [
               --  ("gradExample", gradExample)
                 ]
 
-totalIconList :: Renderable (Path R2) b =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
+totalIconList :: Renderable (Path R2) b =>[(String, Colour Double -> Colour Double -> Diagram b R2)]
 totalIconList = mapScd makeColorable allIcons ++ colorableList
 
 
@@ -295,7 +298,7 @@ shadowDirection ::  R2
 shadowDirection = r2 (0.05, -0.05)
 
 shadowed' :: (Fractional a, ColourOps f, Semigroup a1, Transformable a1,V a1 ~ R2) =>(f a -> f a -> a1) -> f a -> f a -> a1
-shadowed' icon fC lC = (icon fC lC <> translate shadowDirection (icon dC dC))
+shadowed' icon fC lC = icon fC lC <> translate shadowDirection (icon dC dC)
         where dC = darken 0.3 fC
 
 shadowedCond :: (Fractional a, ColourOps f, Semigroup a1, Transformable a1,V a1 ~ R2) =>(f a -> f a -> a1) -> f a -> f a -> Bool -> a1
@@ -321,10 +324,10 @@ prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
                 bC = toColor b
                 lC = toColor l
                 themedIcons = applyTheming fC lC shadow totalIconList
-                onBackground = (if background then
+                onBackground = if background then
                                 setOnBackground bC lC themedIcons
                             else
-                                centerInCircle themedIcons)
+                                centerInCircle themedIcons
                 padList  = mapScd (pad 1.1)
                 allPadded = padList onBackground
                 noBG =  centerInCircle $ applyTheming fC lC True totalIconList
