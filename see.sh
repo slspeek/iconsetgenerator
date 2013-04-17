@@ -1,6 +1,6 @@
 set -e
 #set -x
-./clean.sh
+#./clean.sh
 FC=${1:-"FFA500"}
 BC=${2:-"008080"}
 LC=${3:-"C0C0C0"}
@@ -31,11 +31,14 @@ ICONS_EXECUTABLE=dist/build/iconset/iconset
 
 mkdir -p icons
 PATH=$HOME/tools/bin:$PATH
-cabal clean
+#cabal clean
 cabal configure
 cabal build
 for ICON in left_arrow\
             leave\
+            user\
+            info\
+            userGroup\
             pencil\
             rss\
             key\
@@ -47,6 +50,7 @@ for ICON in left_arrow\
     	    fast_forward\
 	        rewind\
             next\
+            help\
             previous\
             home\
             end\
@@ -65,4 +69,4 @@ do
 done
 $ICONS_EXECUTABLE --width $((256 * 20)) --height $(( 3 * 256))  --maincolor $FC --bgcolor $BC --linecolor $LC --icon overview --output icons/overview.png --shadow --onbackground
 $ICONS_EXECUTABLE --width 256 --height 256 --maincolor $FC --bgcolor $BC --linecolor $LC --icon leave --onbackground --output icons/leave.png
-eog icons/leave.png
+eog icons/info.png
