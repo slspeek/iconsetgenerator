@@ -3,34 +3,90 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE TypeFamilies              #-}
 
-module IconsetGenerator.Icons (radioWaves,
-                               rssIcon,
-                               key,
-                               gear,
-                               gearExample,
-                               running,
-                               gradExample,
-                               heart,
-                               leave,
-                               door,
-                               setOnBackground,
-                               applyTheming,
-                               centerInCircle,
-                               shadowedCond,
-                               backgroundShape',
-                               totalIconList,
-                               prepareAll) where
+module IconsetGenerator.Icons (
+                  allIcons
+                , backgroundShape'
+                , block
+                , centerInCircle
+                , colorableList
+                , combineWithLoop
+                , crossy
+                , door
+                , downArrow
+                , endIcon
+                , enveloppe
+                , fastBackward
+                , fastForward
+                , favorite
+                , favorite'
+                , gear
+                , gearExample
+                , gradExample
+                , heart
+                , helpIcon
+                , home
+                , info
+                , key
+                , leave
+                , leftArrow
+                , leftArrow'
+                , loop
+                , makeColorable
+                , mapScd
+                , minusIcon
+                , pencil
+                , pencilExample
+                , play
+                , plusIcon
+                , prepareAll
+                , radioWaves
+                , rightArrow
+                , rightTriangle
+                , rssIcon
+                , running
+                , setOnBackground
+                , shadowDirection
+                , shadowed'
+                , shadowedCond
+                , stepDown
+                , stepNext
+                , stepPrevious
+                , stepUp
+                , strutedVrule
+                , textIcon
+                , totalIconList
+                , upArrow
+                , zoomIn
+                , zoomOut
+                                ) where
 
 import           Data.Colour          (withOpacity)
 import           Data.Colour.SRGB
 import           Diagrams.Core.Points
 import           Diagrams.Prelude
 import           Diagrams.TwoD.Arc
+import           Diagrams.TwoD.Text   (Text)
 
-leave ::  Renderable (Path R2) b =>
-         Colour Double -> Colour Double -> Diagram b R2
+textIcon :: Renderable Diagrams.TwoD.Text.Text b => String -> Diagram b R2
+textIcon txt = scale 1.6 $ font "Serif" $ italic $ text txt
+
+helpIcon ::  Renderable Diagrams.TwoD.Text.Text b => Diagram b R2
+helpIcon = textIcon "?"
+
+info ::  Renderable Diagrams.TwoD.Text.Text b => Diagram b R2
+info = textIcon "i"
+
+userGroup :: (PathLike a, Alignable a, Transformable a, HasStyle a,Juxtaposable a, V a ~ R2) =>Colour Double -> t -> a
+userGroup mC lC = centerXY $ user1 <> user2
+        where   user1 = user # scale 0.9 # fc mC # lc mC
+                user2 = user # scale 0.85 # translate (r2(0.5,0.10)) # fc (darken 0.8 mC) # lc (darken 0.8 mC)
+
+user :: (PathLike t, Alignable t, Transformable t, Juxtaposable t,V t ~ R2) =>t
+user = scale 1.3 $ centerXY $ (circle 0.2) === roundedRect' 0.7 0.6 with { radiusTL = 0.2
+                                        , radiusTR = 0.2}
+leave :: Renderable (Path R2) b =>Colour Double -> Colour Double -> Diagram b R2
 leave fC lC = fc fC $ lc lC $ translateX (-0.1) $ centerXY $ scale 0.7 $ arrow <> door fC lC
-        where   arrow = rightArrow #scale 0.8 # translate (r2(-0.9,0))
+        where   arrow = rightArrow #  scale 0.8 # translate (r2(-0.9,0))
 
 door :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
 door fC lC = (openDoor <> doorFrame # translate (r2(x/2 -d , -y/2 - a))) # centerXY
@@ -39,19 +95,20 @@ door fC lC = (openDoor <> doorFrame # translate (r2(x/2 -d , -y/2 - a))) # cente
                 a = 0.03
                 x = 1
                 y = -1.7
-                door = fromOffsets [r2(x-d, -a), r2(0, -y), r2(-x+d, -a)]
-                doorClosed = close door
+                doorOpenPath = fromOffsets [r2(x-d, -a), r2(0, -y), r2(-x+d, -a)]
+                doorClosed = close doorOpenPath
                 doorKnob = stroke (circle 0.04) # fc (darken 0.1 fC) # translate (r2(d/2, -y/2 -a))
                 openDoor = doorKnob <> stroke doorClosed
-
 
 
 radioWaves :: (Angle a, PathLike b, HasStyle b, V b ~ R2) => a -> Double -> b
 radioWaves a n = mconcat waves # fcA transparent
        where   waves = [ arc' r 0 a | r <- [(1/n),(2/n)..1]]
 
+
 rssIcon :: (PathLike b, Color c, Transformable b, HasStyle b, V b ~ R2) =>c -> t -> b
 rssIcon mainColor lC = (circle 0.08 <> radioWaves (1/4::CircleFrac)  3) # lineCap LineCapRound # lw 0.1 # translate (-r2(0.4,0.4)) # lineColor mainColor # fillColor mainColor
+
 
 key ::  Renderable (Path R2) b => Diagram b R2
 key =  stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0)))) # fillRule EvenOdd # scale 0.40 # centerXY
@@ -67,6 +124,7 @@ key =  stroke (innerCircle <> (handlePath # moveOriginBy (r2(-(d+1.6),0)))) # fi
              d = 2
              handlePath = close $ pathFromTrail fullTrail
 
+
 gear :: Renderable (Path R2) b => Double -> Diagram b R2
 gear teeth = stroke (fromVertices plusPath  <> circle 0.8) # fillRule EvenOdd # scale 0.666666
        where  plusPath =  concat . take (floor teeth) . iterate (rotateBy (-angle)) $ spike
@@ -75,8 +133,10 @@ gear teeth = stroke (fromVertices plusPath  <> circle 0.8) # fillRule EvenOdd # 
               th = 1/4
               spike = map p2 [(-a, 1), (-(2/3) * a,1 + (th*th)), (-(1/3)* a, 1+th), (a/3, 1 + th), ((2/3)*a,1+(th^2)), (a,1)]
 
+
 gearExample ::  Renderable (Path R2) b => Diagram b R2
 gearExample = centerXY $ beside (r2(1,1)) (scale 0.6 (gear 12)) (scale 0.4 (gear 8))
+
 
 running :: Renderable (Path R2) b => Diagram b R2
 running = translateX (-0.02) $ centerXY $ scale (1/56) $ stroke $ path <> (circle 8 # translate (r2(73, 87)))
@@ -98,6 +158,7 @@ gradExample  = const $  const $ mconcat coloredCircles
               coloredCircles = [ lc color circle| (color, circle) <- zip colors circles]
               count = 200
 
+
 heart :: Renderable (Path R2) b => Diagram b R2
 heart =  stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY # translateY (-0.12)
         where c1 = r2 (0.25, 0.2)
@@ -108,11 +169,14 @@ heart =  stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # ce
               heartT :: Trail R2
               heartT =  fromSegments [leftCurve , reverseSegment rightCurve]
 
+
 favorite' :: Renderable (Path R2) b => Diagram b R2
 favorite' =  stroke (star (StarSkip 2) (regPoly 5 1))
 
+
 favorite :: Renderable (Path R2) b => Diagram b R2
 favorite = favorite'
+
 
 crossy :: Renderable (Path R2) b => Double -> Diagram b R2
 crossy a =  stroke ( fromVertices plusPath) # scale (8/9)
@@ -124,11 +188,14 @@ crossy a =  stroke ( fromVertices plusPath) # scale (8/9)
 plusIcon :: Renderable (Path R2) b => Diagram b R2
 plusIcon = crossy (1/5)
 
+
 minusIcon :: Renderable (Path R2) b => Diagram b R2
 minusIcon = rect (3/2) (1/2) # scale (3/4)
 
+
 rightTriangle :: Renderable (Path R2) b => Diagram b R2
 rightTriangle = eqTriangle 1 # rotateBy (3/4)
+
 
 leftArrow' ::  (PathLike p, V p ~ R2) => Double -> p
 leftArrow' headFactor = polygon with { polyType   = PolySides [ 1/4 :: CircleFrac,
@@ -141,8 +208,10 @@ leftArrow' headFactor = polygon with { polyType   = PolySides [ 1/4 :: CircleFra
           where a = headFactor
                 eqSide =  2 * sqrt ( 1/3 *a)
 
+
 leftArrow ::  (PathLike b, Alignable b, V b ~ R2) => b
 leftArrow = leftArrow' (1/6) # centerXY
+
 
 pencil :: Renderable (Path R2) b =>Double -> Double -> Double -> Diagram b R2
 pencil w h pointL = centerXY $ stroke pencilPath # lineJoin LineJoinRound
@@ -153,8 +222,10 @@ pencil w h pointL = centerXY $ stroke pencilPath # lineJoin LineJoinRound
           rightCurveS = reverseSegment leftCurveS
           pencilPath = close $ fromSegments [leftCurveS, lineS, pointS, reverseSegment $ reflectY pointS]
 
+
 pencilExample ::  Renderable (Path R2) b => Diagram b R2
 pencilExample  = pencil 1.5 0.2 0.3 # rotateBy (-3/8)
+
 
 enveloppe :: Renderable (Path R2) b => Colour Double -> Colour Double -> Diagram b R2
 enveloppe themeFc themeLc =  style (mconcat $ map stroke pathList)
@@ -175,14 +246,18 @@ enveloppe themeFc themeLc =  style (mconcat $ map stroke pathList)
              env       =   close (fromVertices envList)
              pathList  = [ flap, lowerFlap, env]
 
+
 strutedVrule :: Renderable (Path R2) b => Diagram b R2
 strutedVrule = minusIcon # rotateBy (1/4) # scale 0.9
+
 
 rightArrow :: Renderable (Path R2) b => Diagram b R2
 rightArrow = leftArrow # reflectX
 
+
 upArrow :: Renderable (Path R2) b => Diagram b R2
 upArrow = rightArrow # rotateBy (1/4)
+
 
 downArrow :: Renderable (Path R2) b => Diagram b R2
 downArrow = upArrow # rotateBy (1/2)
@@ -243,7 +318,7 @@ zoomIn  =  combineWithLoop  plusIcon
 zoomOut ::  Renderable (Path R2) b => Diagram b R2
 zoomOut  = combineWithLoop minusIcon
 
-allIcons ::  Renderable (Path R2) b => [(String, Diagram b R2)]
+allIcons :: (Renderable Diagrams.TwoD.Text.Text b, Renderable (Path R2) b) =>[([Char], Diagram b R2)]
 allIcons = [  ("running", running),
               ("gear", gearExample),
               ("key", key),
@@ -266,26 +341,29 @@ allIcons = [  ("running", running),
               ("minus", minusIcon),
               ("zoom_out", zoomOut ),
               ("zoom_in" ,zoomIn),
+              ("user", user),
+              ("info", info),
+              ("help", helpIcon),
               ("fast_forward", fastForward),
               ("rewind", fastBackward) ]
 
-makeColorable
-  :: HasStyle b => b -> Colour Double -> Colour Double -> b
+makeColorable :: HasStyle b => b -> Colour Double -> Colour Double -> b
 makeColorable icon fC lC = icon # fc fC # lc lC
 
 mapScd :: (t -> t2) -> [(t1, t)] -> [(t1, t2)]
 mapScd f = map f'
         where f' (x,y) = (x, f y)
 
-colorableList :: Renderable (Path R2) b =>[(String, Colour Double -> Colour Double -> Diagram b R2)]
+colorableList :: Renderable (Path R2) b =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
 colorableList = [
             ( "mail", enveloppe ),
             ("rss", rssIcon),
+            ("userGroup", userGroup),
             ("leave", leave)
               --  ("gradExample", gradExample)
                 ]
 
-totalIconList :: Renderable (Path R2) b =>[(String, Colour Double -> Colour Double -> Diagram b R2)]
+totalIconList :: (Renderable (Path R2) b, Renderable Diagrams.TwoD.Text.Text b) =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
 totalIconList = mapScd makeColorable allIcons ++ colorableList
 
 
@@ -307,6 +385,7 @@ shadowedCond icon fC lC s = if s then
                             else
                                 icon fC lC
 
+applyTheming :: (Fractional a, ColourOps f, Semigroup t2, Transformable t2,V t2 ~ R2) =>f a -> f a -> Bool -> [(t1, f a -> f a -> t2)] -> [(t1, t2)]
 applyTheming themeFc themeLc shadow = mapScd (\y -> shadowedCond y themeFc themeLc shadow)
 
 setOnBackground ::  (PathLike t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>
@@ -316,8 +395,7 @@ setOnBackground bC lC = mapScd (\icon -> icon <> backgroundShape' bC lC)
 centerInCircle :: (PathLike t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>[(t1, t2)] -> [(t1, t2)]
 centerInCircle = mapScd (\icon -> icon <> (circle 1 # lw 0))
 
-prepareAll ::  (Renderable (Path R2) b, Backend b R2) =>
-    String -> String -> String -> Bool -> Bool -> [(String, QDiagram b R2 Any)]
+prepareAll :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[Char]-> [Char]-> [Char]-> Bool-> Bool-> [([Char], QDiagram b R2 Any)]
 prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
         where   toColor x = sRGB24read ('#' : x)
                 fC = toColor f
