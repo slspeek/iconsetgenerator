@@ -54,8 +54,8 @@ for ICON in left_arrow\
             previous\
             home\
             end\
-            stepUp\
-            stepDown\
+            step_up\
+            step_down\
             plus\
             favorite\
             zoom_in\
@@ -63,10 +63,11 @@ for ICON in left_arrow\
             heart\
             running\
             gear\
+            pause\
             minus
 do
  $ICONS_EXECUTABLE --width 256 --height 256 --maincolor $FC --bgcolor $BC --linecolor $FC --icon $ICON --shadow --onbackground --output icons/$ICON.png
 done
 $ICONS_EXECUTABLE --width $((256 * 20)) --height $(( 3 * 256))  --maincolor $FC --bgcolor $BC --linecolor $LC --icon overview --output icons/overview.png --shadow --onbackground
 $ICONS_EXECUTABLE --width 256 --height 256 --maincolor $FC --bgcolor $BC --linecolor $LC --icon leave --onbackground --output icons/leave.png
-eog icons/info.png
+eog icons/pause.png

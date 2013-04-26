@@ -34,6 +34,7 @@ module IconsetGenerator.Icons (
                 , makeColorable
                 , mapScd
                 , minusIcon
+                , pause
                 , pencil
                 , pencilExample
                 , play
@@ -52,7 +53,7 @@ module IconsetGenerator.Icons (
                 , stepNext
                 , stepPrevious
                 , stepUp
-                , strutedVrule
+                , verticalBar
                 , textIcon
                 , totalIconList
                 , upArrow
@@ -66,6 +67,7 @@ import           Diagrams.Core.Points
 import           Diagrams.Prelude
 import           Diagrams.TwoD.Arc
 import           Diagrams.TwoD.Text   (Text)
+
 
 textIcon :: Renderable Diagrams.TwoD.Text.Text b => String -> Diagram b R2
 textIcon txt = scale 1.6 $ font "Serif" $ italic $ text txt
@@ -192,6 +194,8 @@ plusIcon = crossy (1/5)
 minusIcon :: Renderable (Path R2) b => Diagram b R2
 minusIcon = rect (3/2) (1/2) # scale (3/4)
 
+pause = translateX (-0.3) verticalPole ||| strutX 0.2 ||| translateX 0.3 verticalPole
+        where   verticalPole = verticalBar
 
 rightTriangle :: Renderable (Path R2) b => Diagram b R2
 rightTriangle = eqTriangle 1 # rotateBy (3/4)
@@ -247,8 +251,8 @@ enveloppe themeFc themeLc =  style (mconcat $ map stroke pathList)
              pathList  = [ flap, lowerFlap, env]
 
 
-strutedVrule :: Renderable (Path R2) b => Diagram b R2
-strutedVrule = minusIcon # rotateBy (1/4) # scale 0.9
+verticalBar :: Renderable (Path R2) b => Diagram b R2
+verticalBar = minusIcon # rotateBy (1/4) # scale 0.9
 
 
 rightArrow :: Renderable (Path R2) b => Diagram b R2
@@ -266,7 +270,7 @@ play :: Renderable (Path R2) b => Diagram b R2
 play = (hrule 0.2 # lw 0 ||| rightTriangle) # centerXY
 
 stepNext :: Renderable (Path R2) b => Diagram b R2
-stepNext = (rightTriangle ||| strutedVrule) # alignX 0
+stepNext = (rightTriangle ||| verticalBar) # alignX 0
 
 stepPrevious :: Renderable (Path R2) b => Diagram b R2
 stepPrevious = stepNext # reflectX
@@ -318,7 +322,7 @@ zoomIn  =  combineWithLoop  plusIcon
 zoomOut ::  Renderable (Path R2) b => Diagram b R2
 zoomOut  = combineWithLoop minusIcon
 
-allIcons :: (Renderable Diagrams.TwoD.Text.Text b, Renderable (Path R2) b) =>[([Char], Diagram b R2)]
+allIcons :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[([Char], Diagram b R2)]
 allIcons = [  ("running", running),
               ("gear", gearExample),
               ("key", key),
@@ -331,8 +335,9 @@ allIcons = [  ("running", running),
               ("down_arrow", downArrow),
               ("next", stepNext),
               ("previous", stepPrevious),
-              ("stepUp", stepUp),
-              ("stepDown", stepDown),
+              ("step_up", stepUp),
+              ("step_down", stepDown),
+              ("pause", pause),
               ("right_triangle", play),
               ("stop", block),
               ("home", home),
@@ -363,7 +368,7 @@ colorableList = [
               --  ("gradExample", gradExample)
                 ]
 
-totalIconList :: (Renderable (Path R2) b, Renderable Diagrams.TwoD.Text.Text b) =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
+totalIconList :: (Renderable (Path R2) b, Renderable Text b, Backend b R2) =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
 totalIconList = mapScd makeColorable allIcons ++ colorableList
 
 
