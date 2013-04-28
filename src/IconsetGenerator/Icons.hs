@@ -41,6 +41,7 @@ module IconsetGenerator.Icons (
                 , plusIcon
                 , prepareAll
                 , radioWaves
+                , reload
                 , rightArrow
                 , rightTriangle
                 , rssIcon
@@ -53,6 +54,7 @@ module IconsetGenerator.Icons (
                 , stepNext
                 , stepPrevious
                 , stepUp
+                , switchOff
                 , verticalBar
                 , textIcon
                 , totalIconList
@@ -68,24 +70,41 @@ import           Diagrams.Prelude
 import           Diagrams.TwoD.Arc
 import           Diagrams.TwoD.Text   (Text)
 
+type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
+
+reload :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
+reload mC lC =  scale 0.7 $ centerXY $ (stroke (handlePath )# lw 0.08 <> arrowHead # fc mC) # lc mC
+       where a  = 1/4
+             arcTrail = arcT (0 :: CircleFrac) (-a :: CircleFrac)
+             arrowHead = eqTriangle d #  reflectY# translateY (-0.25 * d)
+             fullTrail :: Trail R2
+             fullTrail = arcTrail
+             d = 0.4
+             handlePath =  pathFromTrail fullTrail
+
+switchOff mC lC = lineCap LineCapRound $ centerXY $ scale 0.7 $ lc mC $ lw 0.08 $ centerXY $ arc ((1/4)+a :: CircleFrac) (1/4 - a :: CircleFrac)
+                <>
+                vrule 1 # translateY 0.6 
+        where   a = 1/13
 
 textIcon :: Renderable Diagrams.TwoD.Text.Text b => String -> Diagram b R2
-textIcon txt = scale 1.6 $ font "Serif" $ italic $ text txt
+textIcon txt = scale 1.6 $ text txt
 
 helpIcon ::  Renderable Diagrams.TwoD.Text.Text b => Diagram b R2
 helpIcon = textIcon "?"
 
 info ::  Renderable Diagrams.TwoD.Text.Text b => Diagram b R2
-info = textIcon "i"
+info = font "Serif" $ italic $ textIcon "i"
 
-userGroup :: (PathLike a, Alignable a, Transformable a, HasStyle a,Juxtaposable a, V a ~ R2) =>Colour Double -> t -> a
+userGroup :: Renderable (Path R2) b => DichromeIcon b
 userGroup mC lC = centerXY $ user1 <> user2
-        where   user1 = user # scale 0.9 # fc mC # lc mC
-                user2 = user # scale 0.85 # translate (r2(0.5,0.10)) # fc (darken 0.8 mC) # lc (darken 0.8 mC)
+        where   user1 = user mC lC # scale 0.9
+                user2 = user (darken 0.8 mC)  (darken 0.8 mC) # scale 0.85 # translate (r2(0.5,0.10))
 
-user :: (PathLike t, Alignable t, Transformable t, Juxtaposable t,V t ~ R2) =>t
-user = scale 1.3 $ centerXY $ (circle 0.2) === roundedRect' 0.7 0.6 with { radiusTL = 0.2
+user :: Renderable (Path R2) b => DichromeIcon b
+user = makeColorable $ scale 1.3 $ centerXY $ (circle 0.2) === roundedRect' 0.7 0.6 with { radiusTL = 0.2
                                         , radiusTR = 0.2}
+
 leave :: Renderable (Path R2) b =>Colour Double -> Colour Double -> Diagram b R2
 leave fC lC = fc fC $ lc lC $ translateX (-0.1) $ centerXY $ scale 0.7 $ arrow <> door fC lC
         where   arrow = rightArrow #  scale 0.8 # translate (r2(-0.9,0))
@@ -194,6 +213,7 @@ plusIcon = crossy (1/5)
 minusIcon :: Renderable (Path R2) b => Diagram b R2
 minusIcon = rect (3/2) (1/2) # scale (3/4)
 
+pause ::  (Renderable (Path R2) b, Backend b R2) => Diagram b R2
 pause = translateX (-0.3) verticalPole ||| strutX 0.2 ||| translateX 0.3 verticalPole
         where   verticalPole = verticalBar
 
@@ -346,13 +366,11 @@ allIcons = [  ("running", running),
               ("minus", minusIcon),
               ("zoom_out", zoomOut ),
               ("zoom_in" ,zoomIn),
-              ("user", user),
               ("info", info),
               ("help", helpIcon),
               ("fast_forward", fastForward),
               ("rewind", fastBackward) ]
 
-makeColorable :: HasStyle b => b -> Colour Double -> Colour Double -> b
 makeColorable icon fC lC = icon # fc fC # lc lC
 
 mapScd :: (t -> t2) -> [(t1, t)] -> [(t1, t2)]
@@ -364,6 +382,9 @@ colorableList = [
             ( "mail", enveloppe ),
             ("rss", rssIcon),
             ("userGroup", userGroup),
+            ("user", user),
+            ("switch_off", switchOff),
+            ("reload", reload),
             ("leave", leave)
               --  ("gradExample", gradExample)
                 ]
