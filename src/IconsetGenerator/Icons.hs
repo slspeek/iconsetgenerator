@@ -180,8 +180,7 @@ gradExample  = const $  const $ mconcat coloredCircles
               count = 200
 
 
-heart :: Renderable (Path R2) b => Diagram b R2
-heart =  stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # centerXY # translateY (-0.12)
+heart = showOrigin $ centerY $ stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 # translateY (-0.42)
         where c1 = r2 (0.25, 0.2)
               c2 = r2 (0.5,0)
               c3 = r2 (0,-0.5)
