@@ -35,6 +35,8 @@ PATH=$HOME/tools/bin:$PATH
 cabal configure
 cabal build
 for ICON in left_arrow\
+            tree\
+            reload_tree\
             reload\
             leave\
             user\
@@ -47,9 +49,9 @@ for ICON in left_arrow\
             up_arrow\
             down_arrow\
             right_triangle\
-	        stop\
+            stop\
     	    fast_forward\
-	        rewind\
+            rewind\
             next\
             help\
             previous\
@@ -70,6 +72,6 @@ for ICON in left_arrow\
 do
  $ICONS_EXECUTABLE --width 256 --height 256 --maincolor $FC --bgcolor $BC --linecolor $FC --icon $ICON --shadow --onbackground --output icons/$ICON.png
 done
-$ICONS_EXECUTABLE --width $((256 * 20)) --height $(( 3 * 256))  --maincolor $FC --bgcolor $BC --linecolor $LC --icon overview --output icons/overview.png --shadow --onbackground
+$ICONS_EXECUTABLE --width $((256 * 10)) --height $(( 4 * 3 * 256))  --maincolor $FC --bgcolor $BC --linecolor $LC --icon overview --output icons/overview.png --shadow --onbackground
 $ICONS_EXECUTABLE --width 256 --height 256 --maincolor $FC --bgcolor $BC --linecolor $LC --icon leave --onbackground --output icons/leave.png
-eog icons/heart.png
+eog icons/overview.png

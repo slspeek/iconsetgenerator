@@ -2,6 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses     #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE TypeFamilies              #-}
+{-# LANGUAGE BangPatterns              #-}
 
 module IconsetGenerator.Icons (
                   allIcons
@@ -22,6 +23,7 @@ module IconsetGenerator.Icons (
                 , gear
                 , gearExample
                 , gradExample
+                , treeIcon
                 , heart
                 , helpIcon
                 , home
@@ -42,6 +44,7 @@ module IconsetGenerator.Icons (
                 , prepareAll
                 , radioWaves
                 , reload
+                , reloadTree
                 , rightArrow
                 , rightTriangle
                 , rssIcon
@@ -72,19 +75,36 @@ import           Diagrams.TwoD.Text   (Text)
 
 type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
 
+reloadTree :: (Renderable (Path R2) b, Backend b R2) =>Colour Double -> t -> QDiagram b R2 Any
+reloadTree mC lC = translateX 0.1 . scale 0.8 . centerXY $ ((freeze $ treeIcon mC lC) ||| strutX 0.15 ||| (scale (4/7) $ freeze $ reflectX $ reload mC lC))
+
+treeIcon :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
+treeIcon mC _ = scale 0.6 . centerXY . lw 0.13 . lc mC . stroke $ mconcat tree
+        where   raT = fromOffsets $ map r2 [(0,-1),(1.25,0)]
+                raP1 = pathFromTrailAt raT (p2(-1,1))
+                raP2 = pathFromTrailAt raT (p2(-1,0))
+                raP3 = pathFromTrailAt (scaleY 0.5 raT) (p2(-1,1))
+                raSP1 = pathFromTrailAt (scale 0.5 raT) (p2(-0.5, 0))
+                raSP2 = pathFromTrailAt (scale 0.5 raT) (p2(-0.5, -1))
+                tree = [raP1, raP2, raP3, raSP1, raSP2]
+
+defaultLineWidth ::  HasStyle a => a -> a
+defaultLineWidth = lw 0.2
+
 reload :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
-reload mC lC =  scale 0.7 $ centerXY $ (stroke (handlePath )# lw 0.12 <> arrowHead # fc mC) # lc mC
+reload mC lC =  scale 0.7 . centerXY $ (stroke (handlePath )# defaultLineWidth <> arrowHead # fc mC) # lc mC
        where a  = 1/4
              arcTrail = arcT (0 :: CircleFrac) (-a :: CircleFrac)
              arrowHead = eqTriangle d #  reflectY # translateY (-0.25 * d)
              fullTrail :: Trail R2
              fullTrail = arcTrail
-             d = 0.5
+             d = 0.7
              handlePath =  pathFromTrail fullTrail
 
-switchOff mC lC = lineCap LineCapRound $ centerXY $ scale 0.7 $ lc mC $ lw 0.12 $ centerXY $ arc ((1/4)+a :: CircleFrac) (1/4 - a :: CircleFrac)
+switchOff :: (PathLike a, Alignable a, Transformable a, HasStyle a, V a ~ R2) =>Colour Double -> t -> a
+switchOff mC lC = lineCap LineCapRound . centerXY . scale 0.7 . lc mC . defaultLineWidth . centerXY $ arc ((1/4)+a :: CircleFrac) (1/4 - a :: CircleFrac)
                 <>
-                vrule 1 # translateY 0.6 
+                vrule 1 # translateY 0.6
         where   a = 1/13
 
 textIcon :: Renderable Diagrams.TwoD.Text.Text b => String -> Diagram b R2
@@ -106,7 +126,7 @@ user = makeColorable $ scale 1.3 $ centerXY $ (circle 0.2) === roundedRect' 0.7 
                                         , radiusTR = 0.2}
 
 leave :: Renderable (Path R2) b =>Colour Double -> Colour Double -> Diagram b R2
-leave fC lC = fc fC $ lc lC $ translateX (-0.1) $ centerXY $ scale 0.7 $ arrow <> door fC lC
+leave fC lC = fc fC . lc lC . translateX (-0.1) . centerXY . scale 0.7 $ arrow <> door fC lC
         where   arrow = rightArrow #  scale 0.8 # translate (r2(-0.9,0))
 
 door :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
@@ -316,24 +336,25 @@ fastBackward :: Renderable (Path R2) b => Diagram b R2
 fastBackward = fastForward # reflectX
 
 loop ::  Renderable (Path R2) b => Diagram b R2
-loop =  stroke (innerCircle <> (handlePath # moveOriginTo endP)) # fillRule EvenOdd
-       where a  = 1/40
-             innerCircle =  circle 0.7
+loop =   stroke (innerCircle <> (handlePath # moveOriginTo endP)) # fillRule EvenOdd
+       where a  = 1/50
+             innerCircle =  circle 0.8
              arcTrail = arcT (a :: CircleFrac) (-a :: CircleFrac)
              handleTopLineT = fromOffsets [r2(-d,0)]
              handleBottomLineT = fromOffsets [r2(d,0)]
              fullTrail :: Trail R2
              fullTrail = mconcat [handleTopLineT ,arcTrail, handleBottomLineT]
-             d = 1.5
+             d = 0.7
              handlePath = close $ pathFromTrail fullTrail
              allPoints = concat (pathVertices handlePath)
              endP = last allPoints # scale 0.5 # translate (r2(-(d+1),0))
 
 combineWithLoop :: Renderable (Path R2) b => Diagram b R2 -> Diagram b R2
-combineWithLoop diagram = ((diagram # rotateBy (3/8:: CircleFrac) # scale 0.8
+combineWithLoop diagram =  positionDiagram ( positionSubdiagram diagram
                                                   <>
-                                            loop) # rotateBy (-3/8:: CircleFrac))# centerXY # scale 0.5
-
+                                            loop)
+          where   positionDiagram = translate (r2(0.07, 0.07)) . scale 0.7 . centerXY . rotateBy (-3/8:: CircleFrac)
+                  positionSubdiagram = rotateBy (3/8:: CircleFrac) . scale 0.8
 
 zoomIn ::  Renderable (Path R2) b => Diagram b R2
 zoomIn  =  combineWithLoop  plusIcon
@@ -376,7 +397,6 @@ mapScd :: (t -> t2) -> [(t1, t)] -> [(t1, t2)]
 mapScd f = map f'
         where f' (x,y) = (x, f y)
 
-colorableList :: Renderable (Path R2) b =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
 colorableList = [
             ( "mail", enveloppe ),
             ("rss", rssIcon),
@@ -384,7 +404,9 @@ colorableList = [
             ("user", user),
             ("switch_off", switchOff),
             ("reload", reload),
-            ("leave", leave)
+            ("leave", leave),
+            ("reload_tree", reloadTree),
+            ("tree", treeIcon)
               --  ("gradExample", gradExample)
                 ]
 
@@ -420,7 +442,39 @@ setOnBackground bC lC = mapScd (\icon -> icon <> backgroundShape' bC lC)
 centerInCircle :: (PathLike t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>[(t1, t2)] -> [(t1, t2)]
 centerInCircle = mapScd (\icon -> icon <> (circle 1 # lw 0))
 
-prepareAll :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[Char]-> [Char]-> [Char]-> Bool-> Bool-> [([Char], QDiagram b R2 Any)]
+
+
+
+makeSplitIndex
+    :: Int          -- ^ Number of chunks to split range on (@n@)
+    -> Int          -- ^ Start of range
+    -> Int          -- ^ End of range
+    -> (Int -> Int) -- ^ Split index function
+makeSplitIndex chunks start end =
+    let !len = end - start
+    in if len < chunks
+            then \c -> start + (min c len)
+            else let (chunkLen, chunkLeftover) = len `quotRem` chunks
+                 in \c -> if c < chunkLeftover
+                        then start + c * (chunkLen + 1)
+                        else start + c * chunkLen + chunkLeftover
+-- | Well-known missed in "Data.List.Split" function.
+evenChunks
+    :: [a]    -- ^ List to split
+    -> Int    -- ^ Number of chuncks (@n@)
+    -> [[a]]  -- ^ Exactly @n@ even chunks of the initial list
+evenChunks xs n =
+    let len = length xs
+        {-# INLINE splitIndex #-}
+        splitIndex = makeSplitIndex n 0 len
+        chunk i =
+            let s = splitIndex i
+                e = splitIndex (i + 1)
+            in take (e - s) (drop s xs)
+    in map chunk [0..n-1]
+
+evenChunksOff n xs = evenChunks xs (ceiling ((fromIntegral $ length xs)/n))
+
 prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
         where   toColor x = sRGB24read ('#' : x)
                 fC = toColor f
@@ -436,4 +490,4 @@ prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
                 noBG =  centerInCircle $ applyTheming fC lC True totalIconList
                 noBGnoSh =  centerInCircle $ applyTheming fC lC False totalIconList
                 noShadow = setOnBackground bC lC $ applyTheming fC lC False totalIconList
-                overviewImage = vcat $ map (hcat . map snd . padList) [noBGnoSh, noBG, noShadow, onBackground]
+                overviewImage = vcat' with { sep = 1}  $ map (vcat . (map hcat) . (evenChunksOff 10) . map snd . padList) [noBGnoSh, noBG, noShadow, onBackground]
