@@ -39,6 +39,7 @@ for ICON in left_arrow\
             reload_tree\
             reload\
             leave\
+            turtle\
             user\
             info\
             userGroup\
@@ -55,6 +56,7 @@ for ICON in left_arrow\
             next\
             help\
             previous\
+            hare\
             home\
             end\
             step_up\
@@ -74,4 +76,4 @@ do
 done
 $ICONS_EXECUTABLE --width $((256 * 10)) --height $(( 4 * 3 * 256))  --maincolor $FC --bgcolor $BC --linecolor $LC --icon overview --output icons/overview.png --shadow --onbackground
 $ICONS_EXECUTABLE --width 256 --height 256 --maincolor $FC --bgcolor $BC --linecolor $LC --icon leave --onbackground --output icons/leave.png
-eog icons/overview.png
+eog icons/turtle.png
