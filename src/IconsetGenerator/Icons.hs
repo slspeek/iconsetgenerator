@@ -2,7 +2,6 @@
 {-# LANGUAGE MultiParamTypeClasses     #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE TypeFamilies              #-}
-{-# LANGUAGE BangPatterns              #-}
 
 module IconsetGenerator.Icons (
                   allIcons
@@ -23,6 +22,7 @@ module IconsetGenerator.Icons (
                 , gear
                 , gearExample
                 , gradExample
+                , hare
                 , treeIcon
                 , heart
                 , helpIcon
@@ -58,6 +58,7 @@ module IconsetGenerator.Icons (
                 , stepPrevious
                 , stepUp
                 , switchOff
+                , turtle
                 , verticalBar
                 , textIcon
                 , totalIconList
@@ -74,6 +75,36 @@ import           Diagrams.TwoD.Arc
 import           Diagrams.TwoD.Text   (Text)
 
 type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
+
+turtle ::  (PathLike c, Alignable c, Transformable c, V c ~ R2) => c
+turtle = translateX 0.02 . scale (1/400) . centerXY . reflectX . reflectY $ turtleSpline
+        where   head :: [P2]
+                head = [114&180,  76&161, 40&132, 18&119, 14&109, 3&105, 2&90, 8&66, 31&59, 76&70,
+                        111&90, 115&88, 144&102]
+                back = [169&86, 194&61, 216&48, 256&30, 321&13, 341&12, 350&14, 386&10, 418&11, 
+                        438&16, 493&36, 548&84, 582&145, 592&174, 604&184, 582&219 ]
+                rearLegs = [552&234, 571&259, 601&291, 560&317, 520&288, 509&266]
+                belly = [376&270, 290&266, 200&268, 156&252]
+                frontLegs = [157&264, 146&297, 114&308, 84&294, 104&266, 91&208, 105&185]
+                turtle :: [P2]
+                turtle = concat [head, back, rearLegs, belly, frontLegs]
+                turtleSpline = cubicSpline True turtle
+
+
+hare ::  (PathLike c, Alignable c, Transformable c, V c ~ R2) => c
+hare = translateX 0.02 . scale (1/196) . centerXY . reflectX . reflectY $ hareSpline
+        where   head :: [P2]
+                head = [59&84.5, 51&74.5, 40&71, 40&61.5, 55.5&45, 65.5&38.5, 62&17, 67&5, 71.5&3.5,
+                        73.5&4.5, 79.5&0, 84&1.5, 85.5&17, 84&30, 80.5&38, 82&48.5, 89&56, 94.5&60]
+                back = [107.5&63, 155.5&70.5, 191&69.5, 216&63.5, 234.5&68.5, 246&79, 252.5&97.5,
+                        257&108.5]
+                rearLegs = [274.5&121.5, 300&134, 325&151.5, 331.5&160, 329&169, 312&162.5, 277.5&142,
+                        251&132.5, 228&125.5, 209&117]
+                belly = [191&117, 159&126, 121&127, 85&123, 75.5&123.5]
+                frontLegs = [46.5&144, 20.5&157.5, 9.5&149, 30.5&143.5, 58.5&122.5, 30.5&117.5,
+                        7.5&118, 0&111, 32.5&108.5, 56.5&105, 55.5&91.5]
+                hare = concat [head, back, rearLegs, belly, frontLegs]
+                hareSpline = cubicSpline True hare
 
 reloadTree :: (Renderable (Path R2) b, Backend b R2) =>Colour Double -> t -> QDiagram b R2 Any
 reloadTree mC lC = translateX 0.1 . scale 0.8 . centerXY $ ((freeze $ treeIcon mC lC) ||| strutX 0.15 ||| (scale (4/7) $ freeze $ reflectX $ reload mC lC))
@@ -364,6 +395,8 @@ zoomOut  = combineWithLoop minusIcon
 
 allIcons :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[([Char], Diagram b R2)]
 allIcons = [  ("running", running),
+              ("hare", hare),
+              ("turtle", turtle),
               ("gear", gearExample),
               ("key", key),
               ("heart", heart),
@@ -442,38 +475,9 @@ setOnBackground bC lC = mapScd (\icon -> icon <> backgroundShape' bC lC)
 centerInCircle :: (PathLike t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>[(t1, t2)] -> [(t1, t2)]
 centerInCircle = mapScd (\icon -> icon <> (circle 1 # lw 0))
 
-
-
-
-makeSplitIndex
-    :: Int          -- ^ Number of chunks to split range on (@n@)
-    -> Int          -- ^ Start of range
-    -> Int          -- ^ End of range
-    -> (Int -> Int) -- ^ Split index function
-makeSplitIndex chunks start end =
-    let !len = end - start
-    in if len < chunks
-            then \c -> start + (min c len)
-            else let (chunkLen, chunkLeftover) = len `quotRem` chunks
-                 in \c -> if c < chunkLeftover
-                        then start + c * (chunkLen + 1)
-                        else start + c * chunkLen + chunkLeftover
--- | Well-known missed in "Data.List.Split" function.
-evenChunks
-    :: [a]    -- ^ List to split
-    -> Int    -- ^ Number of chuncks (@n@)
-    -> [[a]]  -- ^ Exactly @n@ even chunks of the initial list
-evenChunks xs n =
-    let len = length xs
-        {-# INLINE splitIndex #-}
-        splitIndex = makeSplitIndex n 0 len
-        chunk i =
-            let s = splitIndex i
-                e = splitIndex (i + 1)
-            in take (e - s) (drop s xs)
-    in map chunk [0..n-1]
-
-evenChunksOff n xs = evenChunks xs (ceiling ((fromIntegral $ length xs)/n))
+evenChunksOff ::  Int -> [a] -> [[a]]
+evenChunksOff n [] = []
+evenChunksOff n notnull = (take n notnull): evenChunksOff n (drop n notnull)
 
 prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
         where   toColor x = sRGB24read ('#' : x)
