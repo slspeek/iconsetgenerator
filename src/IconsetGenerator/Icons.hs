@@ -32,6 +32,7 @@ module IconsetGenerator.Icons (
                 , leave
                 , leftArrow
                 , leftArrow'
+                , locked
                 , loop
                 , makeColorable
                 , mapScd
@@ -63,6 +64,7 @@ module IconsetGenerator.Icons (
                 , textIcon
                 , totalIconList
                 , upArrow
+                , unlocked
                 , zoomIn
                 , zoomOut
                                 ) where
@@ -75,6 +77,27 @@ import           Diagrams.TwoD.Arc
 import           Diagrams.TwoD.Text   (Text)
 
 type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
+
+locked = centerXY . scale 0.7 $ (translateX (0.5) bow 
+           ===
+        roundedRect 1.3 1 0.04 )
+        where   bow = lw 0.10 . fcA transparent . stroke . scale 0.5 . pathFromTrail
+                 $ (vertT1 `mappend` arcT (0::CircleFrac) (1/2::CircleFrac)
+                 `mappend` vertT2)
+                        where   vertL = 0.3
+                                vertT1 = fromOffsets [r2(0,vertL)]
+                                vertT2 = reflectY vertT1
+                        
+unlocked = centerXY . scale 0.7 $ (translateX (-0.5) bow 
+           ===
+        roundedRect 1.3 1 0.04 )
+        where   bow = lw 0.10 . fcA transparent . stroke . scale 0.5 . pathFromTrail
+                 $ (vertT1 `mappend` arcT (0::CircleFrac) (1/2::CircleFrac)
+                 `mappend` vertT2)
+                        where   vertL = 0.5
+                                vertT1 = fromOffsets [r2(0,vertL)]
+                                vertT2 = reflectY vertT1
+          
 
 turtle ::  (PathLike c, Alignable c, Transformable c, V c ~ R2) => c
 turtle = translateX 0.02 . scale (1/400) . centerXY . reflectX . reflectY $ turtleSpline
@@ -396,6 +419,8 @@ zoomOut  = combineWithLoop minusIcon
 allIcons :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[([Char], Diagram b R2)]
 allIcons = [  ("running", running),
               ("hare", hare),
+              ("locked", locked),
+              ("unlocked", unlocked),
               ("turtle", turtle),
               ("gear", gearExample),
               ("key", key),
