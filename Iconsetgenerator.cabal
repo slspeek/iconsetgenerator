@@ -5,7 +5,7 @@ build-type:     Simple
 author:         steven
 license:        GPL-3
 
-executable iconset
+executable icons
   build-depends:   
                    base >= 4,
                    diagrams,
@@ -17,8 +17,11 @@ executable iconset
                    filepath == 1.3.0.0,
                    directory==1.1.0.2,
                    split==0.2.1.1,
-                   cmdargs
-
+                   cmdargs,
+                   blaze-html,
+                   happstack-lite,
+                   text,
+                   transformers
   hs-source-dirs:  src
   ghc-options:     -Wall -rtsopts
   main-is:         IconsetGenerator/Main.hs
@@ -27,9 +30,35 @@ executable iconset
                    NoMonomorphismRestriction, 
                    TypeFamilies
 
+executable iconserver
+  build-depends:   
+                   base >= 4,
+                   diagrams,
+                   colour >= 2.3.3,
+                   diagrams-core,
+                   diagrams-cairo,
+                   diagrams-lib,
+                   process >= 1.1.0.1,
+                   filepath == 1.3.0.0,
+                   directory==1.1.0.2,
+                   split==0.2.1.1,
+                   cmdargs,
+                   blaze-html,
+                   happstack-lite,
+                   text,
+                   transformers
+  hs-source-dirs:  src
+  ghc-options:     -Wall -rtsopts
+  main-is:         IconsetGenerator/IconServer.hs
+  extensions:      
+                   FlexibleContexts, 
+                   NoMonomorphismRestriction, 
+                   TypeFamilies
+
 Library
   Build-Depends:     base >= 3 && < 5
-  Exposed-modules:   IconsetGenerator.Icons
+  Exposed-modules:   IconsetGenerator.Icons,
+                     IconsetGenerator.CmdLine   
   ghc-options:       -Wall
   hs-source-dirs:  src
   extensions:      
