@@ -27,6 +27,7 @@ module IconsetGenerator.Icons (
                 , heart
                 , helpIcon
                 , home
+                , iconNames
                 , info
                 , key
                 , leave
@@ -78,6 +79,7 @@ import           Diagrams.TwoD.Text   (Text)
 
 type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
 
+locked ::  Renderable (Path R2) b => Diagram b R2
 locked = centerXY . scale 0.7 $ (translateX (0.5) bow 
            ===
         roundedRect 1.3 1 0.04 )
@@ -88,6 +90,7 @@ locked = centerXY . scale 0.7 $ (translateX (0.5) bow
                                 vertT1 = fromOffsets [r2(0,vertL)]
                                 vertT2 = reflectY vertT1
                         
+unlocked ::  Renderable (Path R2) b => Diagram b R2
 unlocked = centerXY . scale 0.7 $ (translateX (-0.5) bow 
            ===
         roundedRect 1.3 1 0.04 )
@@ -254,6 +257,7 @@ gradExample  = const $  const $ mconcat coloredCircles
               count = 200
 
 
+heart ::  Renderable (Path R2) b => Diagram b R2
 heart = translateY (-0.10) $ centerY $ stroke (pathFromTrailAt heartT (p2(0,-2))) # scaleY 2 # scaleX 2.4 
         where c1 = r2 (0.25, 0.2)
               c2 = r2 (0.5,0)
@@ -449,12 +453,14 @@ allIcons = [  ("running", running),
               ("fast_forward", fastForward),
               ("rewind", fastBackward) ]
 
+makeColorable :: HasStyle b => b -> Colour Double -> Colour Double -> b
 makeColorable icon fC lC = icon # fc fC # lc lC
 
 mapScd :: (t -> t2) -> [(t1, t)] -> [(t1, t2)]
 mapScd f = map f'
         where f' (x,y) = (x, f y)
 
+colorableList :: (Renderable (Path R2) b, Backend b R2) =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
 colorableList = [
             ( "mail", enveloppe ),
             ("rss", rssIcon),
@@ -471,6 +477,8 @@ colorableList = [
 totalIconList :: (Renderable (Path R2) b, Renderable Text b, Backend b R2) =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
 totalIconList = mapScd makeColorable allIcons ++ colorableList
 
+iconNames :: [String]
+iconNames = ["overview"] ++ map fst (totalIconList :: [([Char], Colour Double -> Colour Double -> D R2)])
 
  -- backgroundShape = (star (StarSkip 2) (regPoly 8 1) ) # stroke # fc themeBc # scale 1.3
 backgroundShape' :: (PathLike b, Transformable b, HasStyle b, V b ~ R2) =>
@@ -504,6 +512,7 @@ evenChunksOff ::  Int -> [a] -> [[a]]
 evenChunksOff n [] = []
 evenChunksOff n notnull = (take n notnull): evenChunksOff n (drop n notnull)
 
+prepareAll :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[Char]-> [Char]-> [Char]-> Bool-> Bool-> [([Char], QDiagram b R2 Any)]
 prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
         where   toColor x = sRGB24read ('#' : x)
                 fC = toColor f
@@ -520,3 +529,5 @@ prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
                 noBGnoSh =  centerInCircle $ applyTheming fC lC False totalIconList
                 noShadow = setOnBackground bC lC $ applyTheming fC lC False totalIconList
                 overviewImage = vcat' with { sep = 1}  $ map (vcat . (map hcat) . (evenChunksOff 10) . map snd . padList) [noBGnoSh, noBG, noShadow, onBackground]
+
+
