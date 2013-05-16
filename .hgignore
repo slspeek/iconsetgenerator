@@ -1,3 +1,11 @@
-[glob]
-.dist-wrapper/
-
+node_modules
+dist
+.tmp
+.sass-cache
+app/components
+SourceGraph
+.*\.hi
+.*\.o
+icons
+tags
+.*~
