@@ -20,6 +20,7 @@ import Text.JSON.Generic
 import System.IO 
 import Data.Text.Lazy (pack)
 import Data.String (fromString)
+import Data.List(sort)
 main :: IO ()
 main = serve Nothing myApp
 
@@ -42,7 +43,7 @@ template title body = toResponse $
         p $ a ! href "/" $ "back home"
 
 jsonRoute ::  ServerPart Response
-jsonRoute = do return $ toResponse $ encodeJSON (iconNames::[String])
+jsonRoute = do return $ toResponse $ encodeJSON (sort iconNames::[String])
 
 homePage :: ServerPart Response
 homePage = do
@@ -57,7 +58,7 @@ fileServing =
 
 tempFile :: ServerPart String
 tempFile = liftIO $ do
-               (path, handle) <-  openBinaryTempFile "." "isg.svg"
+               (path, handle) <-  openBinaryTempFile "icontmp" "isg.svg"
                hClose handle
                return path  
 
