@@ -4,7 +4,7 @@
 /*
  * ColorPicker
  *
- * Copyright (c) 2011-2012 Martijn W. van der Lee
+ * Copyright (c) 2011-2013 Martijn W. van der Lee
  * Licensed under the MIT.
  *
  * Full-featured colorpicker for jQueryUI with full theming support.
@@ -42,126 +42,9 @@
 			cmykK:			'K',
 			alphaA:			'A'
 		};
-	};
 
-	var _colorpicker_index = 0,
-
-		_container_popup = '<div class="ui-colorpicker ui-colorpicker-dialog ui-dialog ui-widget ui-widget-content ui-corner-all" style="display: none;"></div>',
-
-		_container_inline = '<div class="ui-colorpicker ui-colorpicker-inline ui-dialog ui-widget ui-widget-content ui-corner-all"></div>',
-
-		_parts_lists = {
-			'full':			['header', 'map', 'bar', 'hex', 'hsv', 'rgb', 'alpha', 'lab', 'cmyk', 'preview', 'swatches', 'footer'],
-			'popup':		['map', 'bar', 'hex', 'hsv', 'rgb', 'alpha', 'preview', 'footer'],
-			'draggable':	['header', 'map', 'bar', 'hex', 'hsv', 'rgb', 'alpha', 'preview', 'footer'],
-			'inline':		['map', 'bar', 'hex', 'hsv', 'rgb', 'alpha', 'preview']
-		},
-
-		_intToHex = function (dec) {
-			var result = Math.round(dec).toString(16);
-			if (result.length === 1) {
-				result = ('0' + result);
-			}
-			return result.toLowerCase();
-		},
-
-		_formats = {
-			'#HEX':		function(color) {
-							return _formatColor('#rxgxbx', color);
-						}
-		,	'#HEX3':	function(color) {
-							var hex3 = _formats.HEX3(color);
-							return hex3 === false? false : '#'+hex3;
-						}
-		,	'HEX':		function(color) {
-							return _formatColor('rxgxbx', color);
-						}
-		,	'HEX3':		function(color) {
-							var rgb = color.getRGB(),
-								r = Math.round(rgb.r * 255),
-								g = Math.round(rgb.g * 255),
-								b = Math.round(rgb.b * 255);
-
-							if (((r >>> 4) == (r &= 0xf))
-							 && ((g >>> 4) == (g &= 0xf))
-							 && ((b >>> 4) == (b &= 0xf))) {
-								return r.toString(16)+g.toString(16)+b.toString(16);
-							}
-							return false;
-						}
-		,	'RGB':		function(color) {
-							return color.getAlpha() >= 1
-									? _formatColor('rgb(rd,gd,bd)', color)
-									: false;
-						}
-		,	'RGBA':		function(color) {
-							return _formatColor('rgba(rd,gd,bd,af)', color);
-						}
-		,	'RGB%':	function(color) {
-							return color.getAlpha() >= 1
-									? _formatColor('rgb(rp%,gp%,bp%)', color)
-									: false;
-						}
-		,	'RGBA%':	function(color) {
-							return _formatColor('rgba(rp%,gp%,bp%,af)', color);
-						}
-		,	'HSL':		function(color) {
-							return color.getAlpha() >= 1
-									? _formatColor('hsl(hd,sd,vd)', color)
-									: false;
-						}
-		,	'HSLA':		function(color) {
-							return _formatColor('hsla(hd,sd,vd,af)', color);
-						}
-		,	'HSL%':	function(color) {
-							return color.getAlpha() >= 1
-									? _formatColor('hsl(hp%,sp%,vp%)', color)
-									: false;
-						}
-		,	'HSLA%':	function(color) {
-							return _formatColor('hsla(hp%,sp%,vp%,af)', color);
-						}
-		,	'NAME':		function(color) {
-							return _closestName(color);
-						}
-		,	'EXACT':	function(color) {		//@todo experimental. Implement a good fallback list
-							return _exactName(color);
-						}
-		},
-
-		_formatColor = function (formats, color) {
-			var that		= this,
-				text		= null,
-				types		= {	'x':	function(v) {return _intToHex(v * 255);}
-							,	'd':	function(v) {return Math.round(v * 255);}
-							,	'f':	function(v) {return v;}
-							,	'p':	function(v) {return v * 100;}
-							},
-				channels	= color.getChannels();
-
-			if (!$.isArray(formats)) {
-				formats = [formats];
-			}
-
-			$.each(formats, function(index, format) {
-				if (_formats[format]) {
-					text = _formats[format](color);
-					return (text === false);
-				} else {
-					text = format.replace(/\\?[argbhsvcmykLAB][xdfp]/g, function(m) {
-						if (m.match(/^\\/)) {
-							return m.slice(1);
-						}
-						return types[m.charAt(1)](channels[m.charAt(0)]);
-					});
-					return false;
-				}
-			});
-
-			return text;
-		},
-
-		_colors = {
+		this.swatches = [];
+		this.swatches['html'] = {
 			'black':				{r: 0, g: 0, b: 0},
 			'dimgray':				{r: 0.4117647058823529, g: 0.4117647058823529, b: 0.4117647058823529},
 			'gray':					{r: 0.5019607843137255, g: 0.5019607843137255, b: 0.5019607843137255},
@@ -302,39 +185,28 @@
 			'crimson':				{r: 0.8627450980392157, g: 0.0784313725490196, b: 0.23529411764705882},
 			'pink':					{r: 1, g: 0.7529411764705882, b: 0.796078431372549},
 			'lightpink':			{r: 1, g: 0.7137254901960784, b: 0.7568627450980392}
+		};
+	};
+
+	var _colorpicker_index = 0,
+
+		_container_popup = '<div class="ui-colorpicker ui-colorpicker-dialog ui-dialog ui-widget ui-widget-content ui-corner-all" style="display: none;"></div>',
+
+		_container_inline = '<div class="ui-colorpicker ui-colorpicker-inline ui-dialog ui-widget ui-widget-content ui-corner-all"></div>',
+
+		_parts_lists = {
+			'full':			['header', 'map', 'bar', 'hex', 'hsv', 'rgb', 'alpha', 'lab', 'cmyk', 'preview', 'swatches', 'footer'],
+			'popup':		['map', 'bar', 'hex', 'hsv', 'rgb', 'alpha', 'preview', 'footer'],
+			'draggable':	['header', 'map', 'bar', 'hex', 'hsv', 'rgb', 'alpha', 'preview', 'footer'],
+			'inline':		['map', 'bar', 'hex', 'hsv', 'rgb', 'alpha', 'preview']
 		},
 
-		_exactName = function(color) {
-			var name	= false;
-
-			$.each(_colors, function(n, color_b) {
-				if (color.equals(new Color(color_b.r, color_b.g, color_b.b))) {
-					name = n;
-					return false;
-				}
-			});
-
-			return name;
-		},
-
-		_closestName = function(color) {
-			var rgb			= color.getRGB(),
-				distance	= null,
-				name		= false,
-				d;
-
-			$.each(_colors, function(n, color_b) {
-				d = color.distance(new Color(color_b.r, color_b.g, color_b.b));
-				if (d < distance || distance === null) {
-					name = n;
-					if (d == 0) {
-						return false;	// can't get much closer than 0
-					}
-					distance = d;
-				}
-			});
-
-			return name;
+		_intToHex = function (dec) {
+			var result = Math.round(dec).toString(16);
+			if (result.length === 1) {
+				result = ('0' + result);
+			}
+			return result.toLowerCase();
 		},
 
         _parseHex = function(color) {
@@ -352,82 +224,7 @@
 				);
             }
 
-            return false;
-        },
-
-        _parseColor = function(color) {
-            var name = $.trim(color).toLowerCase(),
-                m;
-
-            if (color == '') {
-                return new Color();
-            }
-
-            if (_colors[name]) {
-                return new Color(_colors[name].r, _colors[name].g, _colors[name].b);
-            }
-
-            // rgba(r,g,b,a)
-            m = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
-            if (m) {
-                return new Color(
-                    m[1] / 255,
-                    m[2] / 255,
-                    m[3] / 255,
-                    parseFloat(m[4])
-                );
-            }
-
-            // hsla(r,g,b,a)
-            m = /^hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
-            if (m) {
-				return (new Color()).setHSL(
-					m[1] / 255,
-					m[2] / 255,
-					m[3] / 255).setAlpha(parseFloat(m[4]));
-            }
-
-            // rgba(r%,g%,b%,a%)
-            m = /^rgba?\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
-            if (m) {
-                return new Color(
-                    m[1] / 100,
-                    m[2] / 100,
-                    m[3] / 100,
-                    m[4] / 100
-                );
-            }
-
-            // hsla(r%,g%,b%,a%)
-            m = /^hsla?\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
-            if (m) {
-				return (new Color()).setHSL(
-					m[1] / 100,
-					m[2] / 100,
-					m[3] / 100).setAlpha(m[4] / 100);
-            }
-
-            // #rrggbb
-            m = /^#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})$/.exec(color);
-            if (m) {
-                return new Color(
-                    parseInt(m[1], 16) / 255,
-                    parseInt(m[2], 16) / 255,
-                    parseInt(m[3], 16) / 255
-                );
-            }
-
-            // #rgb
-            m = /^#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])$/.exec(color);
-            if (m) {
-                return new Color(
-                   parseInt(m[1] + m[1], 16) / 255,
-                   parseInt(m[2] + m[2], 16) / 255,
-                   parseInt(m[3] + m[3], 16) / 255
-                );
-            }
-
-            return _parseHex(color);
+            return new Color();
         },
 
 		_layoutTable = function(layout, callback) {
@@ -1345,20 +1142,20 @@
                     html = function () {
 						var html = '';
 
-						$.each(inst.options.swatches, function (name, color) {
+						$.each(inst._getSwatches(), function (name, color) {
 							var c = new Color(color.r, color.g, color.b),
 								css = c.toCSS();
-							html += '<div class="ui-colorpicker-swatch" style="background-color: ' + css + '" title="' + name + '"></div>';
+							html += '<div class="ui-colorpicker-swatch" style="background-color:' + css + '" title="' + name + '"></div>';
 						});
 
-						return '<div class="ui-colorpicker-swatches ui-colorpicker-border">' + html + '</div>';
+						return '<div class="ui-colorpicker-swatches ui-colorpicker-border" style="width:' + inst.options.swatchesWidth + 'px">' + html + '</div>';
 					};
 
                 this.init = function () {
                     part = $(html()).appendTo($('.ui-colorpicker-swatches-container', inst.dialog));
 
                     $('.ui-colorpicker-swatch', part).click(function () {
-                        inst.color	= _parseColor($(this).css('background-color'));
+                        inst.color	= inst._parseColor($(this).css('background-color'));
                         inst._change();
                     });
                 };
@@ -1450,7 +1247,6 @@
 							cmyk:	{c: 0, m: 0, y: 0, k: 1}
 						},
 				a = 1,
-				arg,
 				args = arguments,
 				_clip = function(v) {
 					if (isNaN(v) || v === null) {
@@ -1930,7 +1726,16 @@
 					B:	this.getLAB().b
 				};
 			};
-
+			
+			this.getSpaces = function() {
+				return $.extend(true, {}, spaces);
+			};
+			
+			this.setSpaces = function(new_spaces) {
+				spaces = new_spaces;
+				return this;
+			};
+			
 			this.distance = function(color) {
 				var space	= 'lab',
 					getter	= 'get'+space.toUpperCase(),
@@ -1981,13 +1786,17 @@
 			};
 
 			this.copy = function() {
-				var rgb = this.getRGB(),
+				var spaces = this.getSpaces(),
 					a = this.getAlpha();
-				return new Color(rgb.r, rgb.g, rgb.b, a);
+				return new Color(spaces, a);
 			};
 
 			// Construct
-			if (args.length > 0) {
+			if (args.length == 2) {
+				this.setSpaces(args[0]);
+				this.setAlpha(args[1] === 0 ? 0 : args[1] || 1);
+			}
+			if (args.length > 2) {
 				this.setRGB(args[0], args[1], args[2]);
 				this.setAlpha(args[3] === 0 ? 0 : args[3] || 1);
 			}
@@ -2012,7 +1821,7 @@
 			draggable:			true,		// Make popup dialog draggable if header is visible.
 			duration:			'fast',
 			hsv:				true,		// Show HSV controls and modes
-			regional:			'',
+			inline:				true,		// Show any divs as inline by default
 			layout: {
 				map:		[0, 0, 1, 5],	// Left, Top, Width, Height (in table cells).
 				bar:		[1, 0, 1, 5],
@@ -2029,6 +1838,7 @@
 			modal:				false,		// Modal dialog?
 			mode:				'h',		// Initial editing mode, h, s, v, r, g, b or a
 			parts:				'',			// leave empty for automatic selection
+			regional:			'',
 			rgb:				true,		// Show RGB controls and modes
 			showAnim:			'fadeIn',
 			showCancelButton:	true,
@@ -2036,7 +1846,8 @@
 			showCloseButton:	true,
 			showOn:				'focus',	// 'focus', 'button', 'both'
 			showOptions:		{},
-			swatches:			null,
+			swatches:			null,		// null for default or kv-object or names swatches set
+			swatchesWidth:		84,			// width (in number of pixels) of swatches box.
 			title:				null,
 
 			close:              null,
@@ -2065,11 +1876,7 @@
 
 			that.mode		= that.options.mode;
 
-			if (that.options.swatches === null) {
-				that.options.swatches = _colors;
-			}
-
-			if (this.element[0].nodeName.toLowerCase() === 'input' || !this.inline) {
+			if (this.element[0].nodeName.toLowerCase() === 'input' || !that.options.inline) {
 				that._setColor(that.element.val());
 
 				this._callback('init');
@@ -2113,7 +1920,7 @@
 				});
 
 				if (that.options.showOn === 'focus' || that.options.showOn === 'both') {
-					that.element.focus(function () {
+					that.element.on('focus click', function () {
 						that.open();
 					});
 				}
@@ -2150,7 +1957,7 @@
 						that.close();
 					}
 				}).keyup(function (event) {
-					var color = _parseColor(that.element.val());
+					var color = that._parseColor(that.element.val());
 					if (!that.color.equals(color)) {
 						that.color = color;
 						that._change();
@@ -2189,7 +1996,7 @@
 		/* setBackground */
 		_setImageBackground: function() {
 			if (this.image && this.options.buttonColorize) {
-				this.image.css('background-color', this.color.set? _formatColor('RGBA', this.color) : '');
+				this.image.css('background-color', this.color.set? this._formatColor('RGBA', this.color) : '');
 			}
 		},
 
@@ -2221,7 +2028,7 @@
 		},
 
 		_setColor: function(text) {
-			this.color			= _parseColor(text);
+			this.color			= this._parseColor(text);
 			this.currentColor	= this.color.copy();
 
 			this._setImageBackground();
@@ -2364,7 +2171,7 @@
 				$(that.element[0]).parents().each(function() {
 					var z = $(this).css('z-index');
 					if ((typeof(z) === 'number' || typeof(z) === 'string') && z !== '' && !isNaN(z)) {
-						zIndex = z;
+						zIndex = parseInt(z);
 						return false;
 					}
 				});
@@ -2433,7 +2240,7 @@
 
 			if (that.color.set) {
 				data = {
-					formatted: _formatColor(that.options.colorFormat, that.color)
+					formatted: that._formatColor(that.options.colorFormat, that.color)
 				};
 
 				lab = that.color.getLAB();
@@ -2501,8 +2308,8 @@
 					break;
 
 				case 'name':
-					var name = _closestName(this.color);
-					this.color.setRGB(_colors[name].r, _colors[name].g, _colors[name].b);
+					var swatch = this._getSwatch(this._closestName(this.color));
+					this.color.setRGB(swatch.r, swatch.g, swatch.b);
 					break;
 			}
 
@@ -2510,8 +2317,8 @@
 			if (!this.inline) {
 				if (!this.color.set) {
 					this.element.val('');
-				} else if (!this.color.equals(_parseColor(this.element.val()))) {
-					this.element.val(_formatColor(this.options.colorFormat, this.color));
+				} else if (!this.color.equals(this._parseColor(this.element.val()))) {
+					this.element.val(this._formatColor(this.options.colorFormat, this.color));
 				}
 
 				this._setImageBackground();
@@ -2547,6 +2354,246 @@
 		_getRegional: function(name) {
 			return $.colorpicker.regional[this.options.regional][name] !== undefined ?
 				$.colorpicker.regional[this.options.regional][name] : $.colorpicker.regional[''][name];
-        }
+        },
+
+		_getSwatches: function() {
+			if (typeof(this.options.swatches) === 'string') {
+				return $.colorpicker.swatches[this.options.swatches];
+			}
+
+			if ($.isPlainObject(this.options.swatches)) {
+				return $.colorpicker.swatches;
+			}
+
+			return $.colorpicker.swatches.html;
+		},
+
+		_getSwatch: function(name) {
+			var swatches = this._getSwatches(),
+				swatch = false;
+
+			if (swatches[name] !== undefined) {
+				return swatches[name];
+			}
+			
+			$.each(swatches, function(swatchName, current) {
+				if (swatchName.toLowerCase() == name.toLowerCase()) {
+					swatch = current;
+					return false;
+				}
+				return true;
+			});
+			
+			return swatch;
+        },
+
+        _parseColor: function(color) {
+            var c,
+				m;
+
+			// no color
+            if (color == '') {
+                return new Color();
+            }
+
+			// named swatch
+			c = this._getSwatch($.trim(color));
+            if (c) {
+                return new Color(c.r, c.g, c.b);
+            }
+
+            // rgba(r,g,b,a)
+            m = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
+            if (m) {
+                return new Color(
+                    m[1] / 255,
+                    m[2] / 255,
+                    m[3] / 255,
+                    parseFloat(m[4])
+                );
+            }
+
+            // hsla(r,g,b,a)
+            m = /^hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
+            if (m) {
+				return (new Color()).setHSL(
+					m[1] / 255,
+					m[2] / 255,
+					m[3] / 255).setAlpha(parseFloat(m[4]));
+            }
+
+            // rgba(r%,g%,b%,a%)
+            m = /^rgba?\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
+            if (m) {
+                return new Color(
+                    m[1] / 100,
+                    m[2] / 100,
+                    m[3] / 100,
+                    m[4] / 100
+                );
+            }
+
+            // hsla(r%,g%,b%,a%)
+            m = /^hsla?\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
+            if (m) {
+				return (new Color()).setHSL(
+					m[1] / 100,
+					m[2] / 100,
+					m[3] / 100).setAlpha(m[4] / 100);
+            }
+
+            // #rrggbb
+            m = /^#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})$/.exec(color);
+            if (m) {
+                return new Color(
+                    parseInt(m[1], 16) / 255,
+                    parseInt(m[2], 16) / 255,
+                    parseInt(m[3], 16) / 255
+                );
+            }
+
+            // #rgb
+            m = /^#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])$/.exec(color);
+            if (m) {
+                return new Color(
+                   parseInt(m[1] + m[1], 16) / 255,
+                   parseInt(m[2] + m[2], 16) / 255,
+                   parseInt(m[3] + m[3], 16) / 255
+                );
+            }
+			
+			return _parseHex(color);
+        },
+
+		_exactName: function(color) {
+			var name	= false;
+
+			$.each(this._getSwatches(), function(n, swatch) {
+				if (color.equals(new Color(swatch.r, swatch.g, swatch.b))) {
+					name = n;
+					return false;
+				}
+				return true;
+			});
+
+			return name;
+		},
+
+		_closestName: function(color) {
+			var rgb			= color.getRGB(),
+				distance	= null,
+				name		= false,
+				d;
+
+			$.each(this._getSwatches(), function(n, swatch) {
+				d = color.distance(new Color(swatch.r, swatch.g, swatch.b));
+				if (d < distance || distance === null) {
+					name = n;
+					if (d == 0) {
+						return false;	// can't get much closer than 0
+					}
+					distance = d;
+				}
+				return true;
+			});
+
+			return name;
+		},
+
+		_formatColor: function (formats, color) {
+			var that		= this,
+				text		= null,
+				types		= {	'x':	function(v) {return _intToHex(v * 255);}
+							,	'd':	function(v) {return Math.round(v * 255);}
+							,	'f':	function(v) {return v;}
+							,	'p':	function(v) {return v * 100;}
+							},
+				channels	= color.getChannels();
+
+			if (!$.isArray(formats)) {
+				formats = [formats];
+			}
+
+			$.each(formats, function(index, format) {
+				if (that._formats[format]) {
+					text = that._formats[format](color, that);
+					return (text === false);
+				} else {
+					text = format.replace(/\\?[argbhsvcmykLAB][xdfp]/g, function(m) {
+						if (m.match(/^\\/)) {
+							return m.slice(1);
+						}
+						return types[m.charAt(1)](channels[m.charAt(0)]);
+					});
+					return false;
+				}
+			});
+
+			return text;
+		},
+
+		_formats: {
+			'#HEX':		function(color, that) {
+							return that._formatColor('#rxgxbx', color);
+						}
+		,	'#HEX3':	function(color, that) {
+							var hex3 = that._formats.HEX3(color);
+							return hex3 === false? false : '#'+hex3;
+						}
+		,	'HEX':		function(color, that) {
+							return that._formatColor('rxgxbx', color);
+						}
+		,	'HEX3':		function(color, that) {
+							var rgb = color.getRGB(),
+								r = Math.round(rgb.r * 255),
+								g = Math.round(rgb.g * 255),
+								b = Math.round(rgb.b * 255);
+
+							if (((r >>> 4) == (r &= 0xf))
+							 && ((g >>> 4) == (g &= 0xf))
+							 && ((b >>> 4) == (b &= 0xf))) {
+								return r.toString(16)+g.toString(16)+b.toString(16);
+							}
+							return false;
+						}
+		,	'RGB':		function(color, that) {
+							return color.getAlpha() >= 1
+									? that._formatColor('rgb(rd,gd,bd)', color)
+									: false;
+						}
+		,	'RGBA':		function(color, that) {
+							return that._formatColor('rgba(rd,gd,bd,af)', color);
+						}
+		,	'RGB%':		function(color, that) {
+							return color.getAlpha() >= 1
+									? that._formatColor('rgb(rp%,gp%,bp%)', color)
+									: false;
+						}
+		,	'RGBA%':	function(color, that) {
+							return that._formatColor('rgba(rp%,gp%,bp%,af)', color);
+						}
+		,	'HSL':		function(color, that) {
+							return color.getAlpha() >= 1
+									? that._formatColor('hsl(hd,sd,vd)', color)
+									: false;
+						}
+		,	'HSLA':		function(color, that) {
+							return that._formatColor('hsla(hd,sd,vd,af)', color);
+						}
+		,	'HSL%':		function(color, that) {
+							return color.getAlpha() >= 1
+									? that._formatColor('hsl(hp%,sp%,vp%)', color)
+									: false;
+						}
+		,	'HSLA%':	function(color, that) {
+							return that._formatColor('hsla(hp%,sp%,vp%,af)', color);
+						}
+		,	'NAME':		function(color, that) {
+							return that._closestName(color);
+						}
+		,	'EXACT':	function(color, that) {		//@todo experimental. Implement a good fallback list
+							return that._exactName(color);
+						}
+		}
 	});
 }(jQuery));

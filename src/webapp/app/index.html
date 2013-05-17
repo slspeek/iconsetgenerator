@@ -1,57 +1,36 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html >
 <html>
     <head>
-        <title>jQuery Colorpicker</title>
-		<!-- jQuery/jQueryUI (hosted) -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
-		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css"/>
-        <style>
-			body {
-				font-family:	'Segoe UI', Verdana, Arial, Helvetica, sans-serif;
-				font-size:		62.5%;
-			}
-        </style>
-		<script src="components/jquery.colorpicker/jquery.colorpicker.js"></script>
-		<link href="components/jquery.colorpicker/jquery.colorpicker.css" rel="stylesheet" type="text/css"/>
+        <title>Iconsetgenerator</title>
+        <!-- build:css styles/main.css -->
+        <link rel="stylesheet" href="styles/main.css">
+        <!-- endbuild -->
+        <!-- build:js scripts/script.js -->
+        <script src="components/jquery/jquery.js"></script>
+        <script src="components/jquery-ui/ui/jquery-ui.js"></script>
+        <script src="components/jquery.colorpicker/jquery.colorpicker.js"></script>
+        <script src="scripts/icons.js"></script>
+        <!-- endbuild -->
+        <link href="components/jquery-ui/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <link href="components/jquery.colorpicker/jquery.colorpicker.css" rel="stylesheet" type="text/css"/>
     </head>
     <body>
-		<h1>Iconset Generator</h1>
+            <center>
+            <div class="container" >
+                    <h1>Iconset Generator</h1>
+                    <hr/>
+                    <div class="">
+                            <input type="text" id="maincolor" class="cp-input" value="111111"/>
+                            <input type="text" id="background" class="cp-input" value="00AABB"/>
+                            <input type="text" id="linecolor" class="cp-input" value="CCFF50"/>
+                            <select class="icon-input" id="icon"></select>
+                            <input class="icon-input" type="checkbox" id="onbackground" checked />Draw background
+                            <input class="icon-input" type="checkbox" id="shadow" checked />Shadow
+                    </div>
+                    <hr/>
+                    <img id="icon_display" src="" />
                 <hr/>
-
-        <input type="text" id="maincolor" class="cp-input" value="111111"/>
-        <input type="text" id="background" class="cp-input" value="00AABB"/>
-        <input type="text" id="linecolor" class="cp-input" value="CCFF50"/>
-        <hr/>
-        <img id="icon_display" src="" />
-		<script>
-                        var doRequest = function() {
-                                var lineColor = $('#linecolor').val();
-                                var mainColor = $('#maincolor').val();
-                                var background = $('#background').val();
-                                var url = '/icongenerator?linecolor=' + lineColor +
-                                          '&maincolor=' + mainColor +
-                                          '&bgcolor=' + background +
-                                          '&iconname=overview&width=640&height=640';
-                                console.log("URL: " + url);
-                                $.getJSON(url 
-                                           , function(data) {
-                                                console.log("data: " + data);
-                                                $('#icon_display').attr("src", data);
-
-                                        }).fail(function() {
-                                        console.log("Failed");
-                                });
-                                };
-           	$( function() {
-                        $('.cp-input').colorpicker({
-                                close: function(event, color) {
-                                        doRequest();
-                                } 
-                        });
-			});
-		</script>
-		<hr/>
-
-    </body>
+        </div>
+        </center>
+        </body>
 </html>

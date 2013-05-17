@@ -1,6 +1,6 @@
-jQuery.colorpicker v0.9.3
+jQuery.colorpicker v0.9.8
 
-Copyright (c) 2011-2012 Martijn W. van der Lee
+Copyright (c) 2011-2013 Martijn W. van der Lee
 Licensed under the MIT.
 
 Full-featured colorpicker for jQueryUI with full theming support.
@@ -116,6 +116,11 @@ Options:
 	hsv:				true
 		Whether or not to show the inputs for HSV.
 
+	inline:				true
+		If set to false, attaching to a non-input will still make the dialog
+		a popup instead of inline. Make sure you handle events to catch the
+		color change, otherwise you can't use the color.
+
 	layout:				{ ... }
 		Set the position of elements in a table layout.
 		You could create any layout possible with HTML tables by specifying
@@ -178,6 +183,7 @@ Options:
 
 	showOn:				'focus'
 		Same as jQueryUI DatePicker.
+		Also opens on clicks for non-focusable elements.
 
 	showOptions:		{}
 		Same as jQueryUI DatePicker.
@@ -186,6 +192,11 @@ Options:
 		'null' to show swatches of HTML colors or provide your own object
 		with colornames and {r:1, g:1, b:1} array.
 		For example { 'red': {r:1, g:0, b:0}, 'blue': {r:0, g:0, b:1} }
+		Alternatively, load a predefined set of swatches and specify the name.
+		For example, for the pantone set, specify 'pantone'.
+
+	swatchesWidth:		84
+		Width of the swatches display in pixels.
 
 	title:				null
 		Title to display in the header. If null, use language default.
