@@ -26,9 +26,9 @@ main = serve Nothing myApp
 myApp :: ServerPart Response
 myApp = msum
         [
-          dir "iconset"   $ icongenerator
-        , dir "icon"   $ fileServing
-        , dir "json"   $ jsonRoute
+          dir "icongenerator"   $ icongenerator
+        , dir "main"   $ fileServing
+        , dir "iconlist"   $ jsonRoute
         , homePage
         ]
 
@@ -48,7 +48,7 @@ homePage :: ServerPart Response
 homePage = do
         ok $ template "home page" $ do
         H.h1 "Hello!"
-        H.p $ (a ! href ("/iconset?onbackground=true&shadow=true&width=640&height=640&iconname=overview&bgcolor=F00000&maincolor=FFF0FF&linecolor=556555" )$ "Iconset generator")
+        H.p $ (a ! href ("/icongenerator?onbackground=true&shadow=true&width=640&height=640&iconname=overview&bgcolor=F00000&maincolor=FFF0FF&linecolor=556555" )$ "Iconset generator")
 
 fileServing :: ServerPart Response
 fileServing =
@@ -85,16 +85,10 @@ icongenerator =
                 let iconArgs'' = case shadow of
                                 Nothing -> iconArgs'
                                 Just _ -> "--shadow":iconArgs'
-                
                 let iconArgs = case onbackground of
                                 Nothing -> iconArgs''
                                 Just _ -> "--onbackground":iconArgs''
                 liftIO (putStrLn $ "args: " ++ show iconArgs)
                 liftIO (withArgs iconArgs multiMain)
-                ok $ template "Icon parameter" $ do
-                        p $ "width is set to: " >> toHtml (show width)
-                        p $ "height is set to: " >> toHtml (show height)
-                        let path = "icon/" ++ output
-                        img ! src (fromString path)
-                        p $ "change the url to set it to something else."
-
+                let path = "/main/" ++ output
+                return $ toResponse $ encodeJSON (path::String)

@@ -22,15 +22,26 @@
         <input type="text" id="maincolor" class="cp-input" value="111111"/>
         <input type="text" id="background" class="cp-input" value="00AABB"/>
         <input type="text" id="linecolor" class="cp-input" value="CCFF50"/>
+        <hr/>
+        <img id="icon_display" src="" />
 		<script>
                         var doRequest = function() {
                                 var lineColor = $('#linecolor').val();
                                 var mainColor = $('#maincolor').val();
                                 var background = $('#background').val();
-                                console.log("Colors: " + (lineColor, mainColor));
-                                console.log(lineColor);
-                                $.getJSON('json', function(data) {
-                                  });
+                                var url = '/icongenerator?linecolor=' + lineColor +
+                                          '&maincolor=' + mainColor +
+                                          '&bgcolor=' + background +
+                                          '&iconname=overview&width=640&height=640';
+                                console.log("URL: " + url);
+                                $.getJSON(url 
+                                           , function(data) {
+                                                console.log("data: " + data);
+                                                $('#icon_display').attr("src", data);
+
+                                        }).fail(function() {
+                                        console.log("Failed");
+                                });
                                 };
            	$( function() {
                         $('.cp-input').colorpicker({
