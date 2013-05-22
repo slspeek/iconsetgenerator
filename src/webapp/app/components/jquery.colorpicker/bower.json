@@ -1,8 +1,0 @@
-{
-  "name": "jquery.colorpicker",
-  "version": "0.9.8",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/vanderlee/colorpicker"
-  }
-}

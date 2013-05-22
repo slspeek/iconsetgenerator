@@ -134,7 +134,7 @@ module.exports = function (grunt) {
         importPath: '<%= yeoman.app %>/components',
         relativeAssets: true
       },
-      dist: {},
+      dist: { options: { debugInfo: true }},
       server: {
         options: {
           debugInfo: true
@@ -254,6 +254,7 @@ module.exports = function (grunt) {
             'components/**/*',
             'images/{,*/}*.{gif,webp}',
             'styles/fonts/*',
+            'styles/*.css',
             'icontmp/*'
           ]
         }]
