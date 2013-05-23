@@ -58,7 +58,7 @@ fileServing =
 
 tempFile :: ServerPart String
 tempFile = liftIO $ do
-               (path, handle) <-  openBinaryTempFile "icontmp" "isg.svg"
+               (path, handle) <-  openBinaryTempFile "icontmp" "isg.png"
                hClose handle
                return path  
 
