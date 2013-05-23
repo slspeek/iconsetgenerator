@@ -35,6 +35,7 @@ $( function() {
                   options += '<option value="' + item + '">' + item + '</option>';
                 }
                 $('select#icon').html(options);
+                $('select#icon option[value="pause"]').attr('selected', 'selected');
                 doRequest();
               };
         var loadIconNames = function() {
