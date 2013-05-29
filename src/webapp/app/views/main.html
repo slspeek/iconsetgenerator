@@ -1,16 +1,16 @@
 	<div class="container">
     <!-- <div class="container"> {{iconList|json}}</div> -->
-    <div class="container"> {{mainColor}} {{shadow}}</div>
+    <div class="container"> {{iconName}} {{mainColor}} {{shadow}}</div>
           <div class="row">
         <div class="span3">
           <p><label class="span2" for="maincolor">Main color</label>
-                <input ng-model="mainColor" type="text" name="maincolor" id="maincolor" class="cp-input span1" ng-value="111111"/></p>
+                <input ng-on-change="updateIcon()" ng-model="mainColor" colorpicker type="text" name="maincolor" id="maincolor" class="cp-input span1" ng-value="111111"/></p>
                 <p><label class="span2" for="background">Background</label>
-                <input type="text" name="background" id="background" class="cp-input span1" value="00AABB"/>
+                <input ng-model="bgColor" colorpicker type="text" name="background" id="background" class="cp-input span1" value="00AABB"/>
                 <p><label class="span2" for="linecolor">Line color</label>
-                <input type="text" name="linecolor" id="linecolor" class="cp-input span1" value="CCFF50"/>
+                <input ng-model="lineColor" colorpicker type="text" name="linecolor" id="linecolor" class="cp-input span1" value="CCFF50"/>
 <p><label class="span2" for="onbackground">Draw background</label>
-                <input class="icon-input span1" type="checkbox" id="onbackground" name="onbackground" checked/>
+<input ng-model="onBackground" ng-click="updateIcon()" class="icon-input span1" type="checkbox" id="onbackground" name="onbackground" checked/>
         <p>     <label class="span2" for="shadow">Shadow</label>
                 <input ng-model="shadow" class="icon-input span1" type="checkbox" id="shadow" checked/>
 
@@ -19,10 +19,11 @@
 				<img id="icon_display" src="" name="icon_display"/>
 			</div>
       <div class="span2">
-        <p><select size="38" class="icon-input span3" id="icon">
+        <p><select ng-model="iconName" size="38" class="icon-input span3" id="icon">
           <option ng-repeat="iconName in iconList">
             {{iconName}}
           </option>
         </select>
-              </div>
+        <a href="" class="btn" colorpicker>Pick a color!</a>
+      </div>
 	</div>
