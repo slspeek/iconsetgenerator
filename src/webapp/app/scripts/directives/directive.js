@@ -7,37 +7,37 @@ var app = angular.module('iconApp');
 // http://www.eyecon.ro/bootstrap-colorpicker/
 app.directive('colorpicker', function($log) {
 
-        return {
-            require: '?ngModel',
-            link: function(scope, element, attrs, controller) {
-                var updateModel;
+    return {
+      require: '?ngModel',
+      link: function(scope, element, attrs, controller) {
+        var updateModel;
 
-                if (controller != null) {
-                    updateModel = function(value) {
-                        return scope.$apply(function() {
-                                return controller.$setViewValue(value);
-                            });
-                    };
+        if (!(controller === null || controller === undefined)) {
+          updateModel = function(value) {
+            return scope.$apply(function() {
+                return controller.$setViewValue(value);
+              });
+          };
 
-                    controller.$render = function() {
-                        return element.colorpicker({
-                                color: controller.$viewValue,
-                                select: function(e, color) {
-                                    if (updateModel) {
-                                        $log.info(e);
-                                        updateModel(color.formatted);
-                                    }
-                                }
-                            });
-                    };
+          controller.$render = function() {
+            return element.colorpicker({
+                color: controller.$viewValue,
+                select: function(e, color) {
+                  if (updateModel) {
+                    $log.info(e);
+                    updateModel(color.formatted);
+                  }
                 }
+              });
+          };
+        }
 
-                return element.colorpicker({}).on('changeColor', function(e) {
-                        if (updateModel) {
-                            updateModel(e.color.toHex());
-                        }
-                    });
-
+        return element.colorpicker({}).on('changeColor', function(e) {
+            if (updateModel) {
+              updateModel(e.color.toHex());
             }
-        };
-    });
+          });
+
+      }
+    };
+  });
