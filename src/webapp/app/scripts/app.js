@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('iconApp', [])
+angular.module('iconApp', ['ngResource'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
