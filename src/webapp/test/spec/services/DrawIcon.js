@@ -1,12 +1,12 @@
 'use strict';
 
-describe('Service: Icons', function () {
+describe('Service: IconNames', function () {
 
   // load the service's module
   beforeEach(module('iconApp'));
 
   // instantiate service
-  var $httpBackend, scope, Icons;
+  var $httpBackend, scope, IconNames;
 
   beforeEach(function(){
     this.addMatchers({
@@ -20,14 +20,13 @@ describe('Service: Icons', function () {
     scope = $rootScope.$new();
     $httpBackend = $injector.get('$httpBackend');
     $httpBackend.when('GET', '/iconlist').respond([{'name':'icon'}]);
-    Icons = $injector.get('Icons');
+    IconNames = $injector.get('IconNames');
   }));
 
-  it('should return ["icon"]', function () {
-    var iconList = Icons.query();
+  it('should return [{name:"icon"}]', function () {
+    var iconList = IconNames.query();
     expect(iconList).toEqual([]);
     $httpBackend.flush();
     expect(iconList).toEqualData([{'name':'icon'}]);
   });
-
 });
