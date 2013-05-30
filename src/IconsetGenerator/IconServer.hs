@@ -21,6 +21,19 @@ import System.IO
 import Data.Text.Lazy (pack)
 import Data.String (fromString)
 import Data.List(sort)
+
+data IconName = IconName {
+                  name:: String
+                } deriving(Show,Typeable, Data)
+
+data IconUrl = IconUrl {
+                  url:: String
+                } deriving(Show,Typeable, Data)
+
+iconNamesJSON ::  String
+iconNamesJSON = encodeJSON $ map IconName orderedList 
+        where orderedList = sort iconNames
+
 main :: IO ()
 main = serve Nothing myApp
 
@@ -43,7 +56,7 @@ template title body = toResponse $
         p $ a ! href "/" $ "back home"
 
 jsonRoute ::  ServerPart Response
-jsonRoute = do return $ toResponse $ encodeJSON (sort iconNames::[String])
+jsonRoute = do return $ toResponse $ iconNamesJSON
 
 homePage :: ServerPart Response
 homePage = do
@@ -91,5 +104,5 @@ icongenerator =
                                 Just _ -> "--onbackground":iconArgs''
                 liftIO (putStrLn $ "args: " ++ show iconArgs)
                 liftIO (withArgs iconArgs multiMain)
-                let path = "/main/" ++ output
-                return $ toResponse $ encodeJSON (path::String)
+                let path = IconUrl $ "/main/" ++ output
+                return $ toResponse $ encodeJSON (path)

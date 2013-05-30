@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('iconApp')
-  .factory('Icons', function ($resource) {
+  .factory('IconNames', function ($resource) {
         return $resource('/iconlist');
       });
 
