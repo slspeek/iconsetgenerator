@@ -24,9 +24,5 @@ describe('Service: IconNames', function () {
   }));
 
   it('should return [{name:"icon"}]', function () {
-    var iconList = IconNames.query();
-    expect(iconList).toEqual([]);
-    $httpBackend.flush();
-    expect(iconList).toEqualData([{'name':'icon'}]);
   });
 });

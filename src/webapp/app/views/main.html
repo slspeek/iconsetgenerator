@@ -1,28 +1,39 @@
-	<div class="container">
-    <!-- <div class="container"> {{iconList|json}}</div> -->
-    <div class="container"> {{iconName}} {{mainColor}} {{shadow}}</div>
-          <div class="row">
-        <div class="span3">
-          <p><label class="span2" for="maincolor">Main color</label>
-          <input ng-model="mainColor" colorpicker type="text" name="maincolor" id="maincolor" class="cp-input span1" ></input></p>
-                <p><label class="span2" for="background">Background</label>
-                <input ng-model="bgColor" colorpicker type="text" name="background" id="background" class="cp-input span1" />
-                <p><label class="span2" for="linecolor">Line color</label>
-                <input ng-model="lineColor" colorpicker type="text" name="linecolor" id="linecolor" class="cp-input span1" />
-<p><label class="span2" for="onbackground">Draw background</label>
-<input ng-model="onBackground" class="icon-input span1" type="checkbox" id="onbackground" name="onbackground" checked/>
-        <p>     <label class="span2" for="shadow">Shadow</label>
-                <input ng-model="shadow" class="icon-input span1" type="checkbox" id="shadow" checked/>
-
-        </div>
-			<div class="span6">
-        <img id="icon_display" src="{{iconUrl}}" name="icon_display"/>
-			</div>
-      <div class="span2">
-        <p><select ng-model="iconName" size="38" class="icon-input span3" id="icon">
-          <option ng-repeat="icon in iconList">
-            {{icon}}
-          </option>
+<div class="container" ui-keypress="{'enter':'pressS($event)'}">
+  <div class="row">
+    <div class="span4">
+      <img ng-src="{{iconUrl.url}}" />
+    </div>
+    <div class="span4">
+      <p>
+        <label class="span2" for="maincolor">Main color</label>
+        <input ng-model="mainColor" colorpicker type="text" name="maincolor" class="cp-input span1" />
+      </p>
+      <p>
+        <label class="span2" for="background">Background</label>
+        <input ng-model="bgColor" colorpicker type="text" name="background" class="cp-input span1" />
+      </p>
+      <p>
+        <label class="span2" for="linecolor">Line color</label>
+        <input ng-model="lineColor" colorpicker type="text" name="linecolor" class="cp-input span1" />
+      </p>
+      <p>
+        <label class="span2" for="onbackground">Draw background</label>
+        <input ng-model="onBackground" class="icon-input span1" type="checkbox" id="onbackground" name="onbackground" />
+      </p>
+      <p>
+        <label class="span2" for="shadow">Shadow</label>
+        <input ng-model="shadow" name="shadow" class="icon-input span1" type="checkbox" />
+      </p>
+      <p>
+        <button class="span2" ng-click="setLineEqualToMainColor()">Equal</button>
+      </p>
+    </div>
+    <div class="span2">
+      <p>
+        <select ng-model="iconName" size="42" class="icon-input span3">
+          <option ng-repeat="icon in iconList">{{icon}}</option>
         </select>
-      </div>
-	</div>
+      </p>
+    </div>
+  </div>
+</div>

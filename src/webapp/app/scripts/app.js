@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('iconApp', ['ngResource'])
+angular.module('iconApp', ['ngResource','ui.bootstrap', 'ui.keypress'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {

@@ -15,9 +15,8 @@ describe('Controller: MainCtrl', function () {
     });
   });
 
-  beforeEach(inject(function ($injector, $rootScope) {
+  beforeEach(inject(function ($httpBackend, $rootScope) {
     scope = $rootScope.$new();
-    $httpBackend = $injector.get('$httpBackend');
     $httpBackend.when('GET', '/iconlist').respond([{'name':'icon'}]);
   }));
 

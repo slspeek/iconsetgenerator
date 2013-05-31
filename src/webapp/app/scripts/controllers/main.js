@@ -27,31 +27,25 @@ var iconParams = function($scope) {
   return params;
 };
 
-var toStringList = function(objList) {
-  return objList.map(function(obj) { return obj.name; });
-};
-
 angular.module('iconApp')
   .controller('MainCtrl', function ($scope, IconNames , DrawIcon, $log) {
-    IconNames.query({},function(data){
-      $scope.iconList = toStringList(data);
-      $scope.iconName = 'overview';
-    });
+    $scope.iconList = IconNames.list();
+    $scope.iconName = 'overview';
     $scope.shadow = true;
     $scope.onBackground = true;
     $scope.mainColor = '00FF00';
     $scope.bgColor = 'F0FF00';
     $scope.lineColor = 'FFFF00';
     $scope.iconUrl = '';
-    $scope.updateIcon = function() {
+    $scope.pressS = function() {
       $log.info('Changed something');
     };
     $scope.$watch(combinedWatch, function() {
       $log.info('Watching works!');
-      //
-      DrawIcon.get(iconParams($scope), function(data) {
-        $log.info('Got success' + data.url);
-        $scope.iconUrl = data.url;
-      });
+      $scope.iconUrl = DrawIcon.get(iconParams($scope));
     });
+    $scope.setLineEqualToMainColor = function() {
+      $scope.lineColor = $scope.mainColor;
+      $log.info('line: ' + $scope.lineColor + ' main: ' + $scope.mainColor);
+    };
   });
