@@ -18,21 +18,22 @@ app.directive('colorpicker', function($log) {
                 return controller.$setViewValue(value);
               });
           };
-
           controller.$render = function() {
+            element.val(controller.$viewValue);
             return element.colorpicker({
-                color: controller.$viewValue,
                 select: function(e, color) {
                   if (updateModel) {
                     $log.info(e);
+                    $log.info(controller.$viewValue);
                     updateModel(color.formatted);
                   }
-                }
+                },
+                inline: true
               });
           };
         }
 
-        return element.colorpicker({}).on('changeColor', function(e) {
+        return element.colorpicker({color: controller.$viewValue}).on('changeColor', function(e) {
             if (updateModel) {
               updateModel(e.color.toHex());
             }
