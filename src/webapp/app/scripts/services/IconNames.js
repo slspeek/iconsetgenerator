@@ -7,10 +7,9 @@ var toStringList = function(objList) {
 angular.module('iconApp')
   .factory('IconNames', function ($http) {
         return {
-          list: function(success) {
+          list: function() {
             return $http.get('/iconlist').
-              then(toStringList).
-              then(success);
+              then(toStringList);
           }
         };
       });

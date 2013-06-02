@@ -6,7 +6,7 @@ describe('Service: IconNames', function () {
   beforeEach(module('iconApp'));
 
   // instantiate service
-  var $httpBackend, scope, IconNames;
+  var $log, httpBackend, scope, IconNames;
 
   beforeEach(function(){
     this.addMatchers({
@@ -16,19 +16,19 @@ describe('Service: IconNames', function () {
     });
   });
 
-  beforeEach(inject(function ($injector, $rootScope) {
+  beforeEach(inject(function ($injector, $httpBackend, $rootScope) {
     scope = $rootScope.$new();
-    $httpBackend = $injector.get('$httpBackend');
-    $httpBackend.when('GET', '/iconlist').respond([{'name':'icon'}]);
+    httpBackend = $httpBackend;
+    httpBackend.when('GET', '/iconlist').respond([{'name':'icon'}]);
     IconNames = $injector.get('IconNames');
   }));
 
   it('should return [{name:"icon"}]', function () {
     var iconList;
-    IconNames.list(function(data) {
+    IconNames.list().then(function(data) {
       iconList = data;
     });
-    $httpBackend.flush();
+    httpBackend.flush();
     expect(iconList).toEqualData(['icon']);
   });
 });
