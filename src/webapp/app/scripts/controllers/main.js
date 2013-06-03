@@ -27,15 +27,22 @@ var iconParams = function($scope) {
   return params;
 };
 
+var isTrue = function(arg) {
+  if (arg) {
+    return true;
+  } else {
+  	return false;
+  }
+}
 angular.module('iconApp')
-  .controller('MainCtrl', function ($scope, IconNames , DrawIcon, $log) {
+  .controller('MainCtrl', function ($scope, $routeParams, $location, IconNames , DrawIcon, $log) {
     $scope.iconList = IconNames.list();
-    $scope.iconName = 'overview';
-    $scope.shadow = true;
-    $scope.onBackground = true;
-    $scope.mainColor = '00FF00';
-    $scope.bgColor = 'F0FF00';
-    $scope.lineColor = 'FFFF00';
+    $scope.shadow = isTrue($routeParams.Shadow);
+    $scope.onBackground = isTrue($routeParams.Background);
+    $scope.mainColor = $routeParams.MainColor;
+    $scope.bgColor = $routeParams.BgColor;
+    $scope.lineColor = $routeParams.LineColor;
+	$scope.iconName = $routeParams.IconName;
     $scope.iconUrl = '';
     $scope.pressS = function() {
       $log.info('Changed something');
@@ -43,6 +50,15 @@ angular.module('iconApp')
     $scope.$watch(combinedWatch, function() {
       $log.info('Watching works!');
       $scope.iconUrl = DrawIcon.get(iconParams($scope));
+		if ($scope.mainColor !== undefined && $scope.bgColor !== undefined &&
+			$scope.lineColor !== undefined) {
+			$location.url('designer/' + $scope.iconName + '/' +
+						  $scope.mainColor + '/' +
+						  $scope.bgColor + '/' +
+						  $scope.lineColor + '/' +
+						  $scope.shadow + '/' +
+						  $scope.onBackground);
+	    }
     });
     $scope.setLineEqualToMainColor = function() {
       $scope.lineColor = $scope.mainColor;
