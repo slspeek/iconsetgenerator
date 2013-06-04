@@ -51,3 +51,12 @@ describe('Controller: MainCtrl', function () {
     expect(scope.shadow).toBe(true);
   });
 });
+
+describe('strToBoolean', function() {
+  it('should return false on the string false', function () {
+    expect(strToBoolean('false')).toBe(false);
+  });
+  it('should return true on the string true', function() {
+    expect(strToBoolean('true')).toBe(true);
+  });
+});
