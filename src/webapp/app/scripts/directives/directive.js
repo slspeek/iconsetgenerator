@@ -8,18 +8,21 @@ var app = angular.module('iconApp');
 app.directive('colorpicker', function($log) {
 
     return {
-      require: '?ngModel',
+      require: '^ngModel',
+			scope: { cpOnClick: '&cpOnClick',
+			         model: '=ngModel' },
       link: function(scope, element, attrs, controller) {
         var updateModel;
-
         if (!(controller === null || controller === undefined)) {
           updateModel = function(value) {
             return scope.$apply(function() {
-                return controller.$setViewValue(value);
+                //return controller.$setViewValue(value);
+                return scope.model = value;
               });
           };
           controller.$render = function() {
             element.val(controller.$viewValue);
+            element.val(scope.model);
             return element.colorpicker({
                 select: function(e, color) {
                   if (updateModel) {
@@ -28,6 +31,16 @@ app.directive('colorpicker', function($log) {
                     updateModel(color.formatted);
                   }
                 },
+			          close: function() {
+									var d = scope.cpOnClick;
+									$log.info(typeof d);
+									scope.$apply(function() { 
+										//scope.saveLocation(); 
+
+									$log.info('calling cpOnClick');
+										scope.cpOnClick();
+										});
+								},
                 inline: true
               });
           };

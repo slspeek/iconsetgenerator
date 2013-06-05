@@ -46,11 +46,11 @@ var updateLocation = function($scope, $location) {
   };
 
 var strToBoolean = function(str) {
-  if (str == 'false') {
+  if (str === 'false') {
 	  return false;
-		} else {
-		return true;
-		}
+  } else {
+	  return true;
+  }
 };
 angular.module('iconApp')
   .controller('MainCtrl', function ($scope, $routeParams, $location, IconNames , DrawIcon, $log) {
@@ -66,6 +66,7 @@ angular.module('iconApp')
       $log.info('Changed something');
     };
 		$scope.saveLocation = function() {
+		    $log.info("Saving location");
 			updateLocation($scope, $location);
 	  };
     $scope.$watch(combinedWatch, function() {
