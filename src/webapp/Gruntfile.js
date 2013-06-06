@@ -78,7 +78,7 @@ module.exports = function (grunt) {
     },
 
     jsbeautifier: {
-      files : ['src/**/*.js'],
+      files : ['app/**/*.js', 'test/**/*.js'],
       options : {
         indent_size: 2,
         indent_char: ' ',

@@ -9,15 +9,16 @@ app.directive('colorpicker', function($log) {
 
     return {
       require: '^ngModel',
-			scope: { cpOnClick: '&cpOnClick',
-			         model: '=ngModel' },
+      scope: {
+        cpOnClick: '&cpOnClick',
+        model: '=ngModel'
+      },
       link: function(scope, element, attrs, controller) {
         var updateModel;
         if (!(controller === null || controller === undefined)) {
           updateModel = function(value) {
             return scope.$apply(function() {
-                //return controller.$setViewValue(value);
-                return scope.model = value;
+                scope.model = value;
               });
           };
           controller.$render = function() {
@@ -31,22 +32,24 @@ app.directive('colorpicker', function($log) {
                     updateModel(color.formatted);
                   }
                 },
-			          close: function() {
-									var d = scope.cpOnClick;
-									$log.info(typeof d);
-									scope.$apply(function() { 
-										//scope.saveLocation(); 
+                close: function() {
+                  var d = scope.cpOnClick;
+                  $log.info(typeof d);
+                  scope.$apply(function() {
+                      //scope.saveLocation(); 
 
-									$log.info('calling cpOnClick');
-										scope.cpOnClick();
-										});
-								},
+                      $log.info('calling cpOnClick');
+                      scope.cpOnClick();
+                    });
+                },
                 inline: true
               });
           };
         }
 
-        return element.colorpicker({color: controller.$viewValue}).on('changeColor', function(e) {
+        return element.colorpicker({
+            color: controller.$viewValue
+          }).on('changeColor', function(e) {
             if (updateModel) {
               updateModel(e.color.toHex());
             }
