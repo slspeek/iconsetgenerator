@@ -10,11 +10,11 @@
       </p>
       <p>
         <label class="span2" for="background">Background</label>
-        <input ng-model="bgColor" colorpicker type="text" name="background" class="cp-input span1" />
+        <input ng-model="bgColor" cp-on-click="saveLocation()" colorpicker type="text" name="background" class="cp-input span1" />
       </p>
       <p>
         <label class="span2" for="linecolor">Line color</label>
-        <input ng-model="lineColor" colorpicker type="text" name="linecolor" class="cp-input span1" />
+        <input ng-model="lineColor" cp-on-click="saveLocation()" colorpicker type="text" name="linecolor" class="cp-input span1" />
       </p>
       <p>
         <label class="span2" for="onbackground">Draw background</label>
@@ -28,7 +28,7 @@
         <button class="btn span2" ng-click="setLineEqualToMainColor()">Equal</button>
       </p>
       <p>
-        <button class="btn span2" ng-click="saveLocation()">Save to url</button>
+        <button name="save" id="save" class="btn span2" ng-click="saveLocation()">Save to url</button>
       </p>
     </div>
     <div class="span2">

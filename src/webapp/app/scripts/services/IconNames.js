@@ -8,7 +8,7 @@ angular.module('iconApp')
   .factory('IconNames', function ($http) {
         return {
           list: function() {
-            return $http.get('/iconlist').
+            return $http.get('iconlist').
               then(toStringList);
           }
         };
