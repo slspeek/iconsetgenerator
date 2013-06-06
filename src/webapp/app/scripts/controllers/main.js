@@ -39,11 +39,8 @@ var iconHistoryToken = function($scope) {
 };
 
 var updateLocation = function($scope, $location) {
-		if ($scope.mainColor !== undefined && $scope.bgColor !== undefined &&
-			$scope.lineColor !== undefined) {
-			$location.url(iconHistoryToken($scope));
-	  }
-  };
+		$location.url(iconHistoryToken($scope));
+};
 
 var strToBoolean = function(str) {
   if (str === 'false') {

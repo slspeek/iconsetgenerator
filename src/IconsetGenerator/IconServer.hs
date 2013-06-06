@@ -41,9 +41,8 @@ myApp :: ServerPart Response
 myApp = msum
         [
           dir "icongenerator"   $ icongenerator
-        , dir "main"   $ fileServing
         , dir "iconlist"   $ jsonRoute
-        , homePage
+        , fileServing
         ]
 
 template :: Text -> Html -> Response
@@ -104,5 +103,5 @@ icongenerator =
                                 Just _ -> "--onbackground":iconArgs''
                 liftIO (putStrLn $ "args: " ++ show iconArgs)
                 liftIO (withArgs iconArgs multiMain)
-                let path = IconUrl $ "/main/" ++ output
+                let path = IconUrl $ output
                 return $ toResponse $ encodeJSON (path)

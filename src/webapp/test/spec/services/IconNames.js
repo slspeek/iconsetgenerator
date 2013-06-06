@@ -32,3 +32,10 @@ describe('Service: IconNames', function () {
     expect(iconList).toEqualData(['icon']);
   });
 });
+
+describe('function: toStringList', function() {
+	it('should return an array of strings', function() {
+	 	expect(toStringList({data: [{ name: 'Euclid' }]})).toEqual(['Euclid']);
+	});
+});
+ 
