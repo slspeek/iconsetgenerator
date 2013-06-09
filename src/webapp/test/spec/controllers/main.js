@@ -17,7 +17,7 @@ describe('Controller: MainCtrl', function() {
 
     beforeEach(inject(function($httpBackend, $rootScope) {
           scope = $rootScope.$new();
-          $httpBackend.when('GET', '/iconlist').respond([{
+          $httpBackend.when('GET', 'iconlist').respond([{
                 'name': 'icon'
               }
             ]);
