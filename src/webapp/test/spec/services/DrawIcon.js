@@ -19,7 +19,7 @@ describe('Service: DrawIcon', function() {
     beforeEach(inject(function($injector, $httpBackend, $rootScope) {
           scope = $rootScope.$new();
           httpBackend = $httpBackend;
-          httpBackend.expectGET('/icongenerator').respond({
+          httpBackend.expectGET('icongenerator').respond({
               'url': 'icon'
             });
           DrawIcon = $injector.get('DrawIcon');

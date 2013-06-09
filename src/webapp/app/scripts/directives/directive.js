@@ -5,7 +5,7 @@ var app = angular.module('iconApp');
 
 // Add a directive for the bootstrap color picker widget
 // http://www.eyecon.ro/bootstrap-colorpicker/
-app.directive('colorpicker', function($log) {
+app.directive('colorpicker', function() {
 
     return {
       require: '^ngModel',
@@ -22,23 +22,15 @@ app.directive('colorpicker', function($log) {
               });
           };
           controller.$render = function() {
-            element.val(controller.$viewValue);
             element.val(scope.model);
             return element.colorpicker({
                 select: function(e, color) {
                   if (updateModel) {
-                    $log.info(e);
-                    $log.info(controller.$viewValue);
                     updateModel(color.formatted);
                   }
                 },
                 close: function() {
-                  var d = scope.cpOnClick;
-                  $log.info(typeof d);
                   scope.$apply(function() {
-                      //scope.saveLocation(); 
-
-                      $log.info('calling cpOnClick');
                       scope.cpOnClick();
                     });
                 },

@@ -19,7 +19,7 @@ describe('Service: IconNames', function() {
     beforeEach(inject(function($injector, $httpBackend, $rootScope) {
           scope = $rootScope.$new();
           httpBackend = $httpBackend;
-          httpBackend.when('GET', '/iconlist').respond([{
+          httpBackend.when('GET', 'iconlist').respond([{
                 'name': 'icon'
               }
             ]);
