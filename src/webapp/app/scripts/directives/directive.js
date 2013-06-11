@@ -22,8 +22,7 @@ app.directive('colorpicker', function() {
               });
           };
           controller.$render = function() {
-            element.val(scope.model);
-            return element.colorpicker({
+            return jQuery(element).colorpicker({
                 select: function(e, color) {
                   if (updateModel) {
                     updateModel(color.formatted);
@@ -38,8 +37,12 @@ app.directive('colorpicker', function() {
               });
           };
         }
-        element.val(scope.model);
-        return element.colorpicker({
+        scope.$watch(function() {
+            return scope.model;
+          }, function() {
+            element.val(scope.model);
+          });
+        return jQuery(element).colorpicker({
             color: scope.model
           }).on('changeColor', function(e) {
             if (updateModel) {
