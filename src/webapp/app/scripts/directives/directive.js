@@ -38,9 +38,9 @@ app.directive('colorpicker', function() {
               });
           };
         }
-
+        element.val(scope.model);
         return element.colorpicker({
-            color: controller.$viewValue
+            color: scope.model
           }).on('changeColor', function(e) {
             if (updateModel) {
               updateModel(e.color.toHex());
