@@ -7,17 +7,6 @@ basePath = '';
 files = [
   ANGULAR_SCENARIO,
   ANGULAR_SCENARIO_ADAPTER,
-  'app/components/angular/angular.js',
-  'app/components/angular-resource/angular-resource.js',
-  'app/components/angular/',
-  'app/components/angular-mocks/angular-mocks.js',
-  "app/components/angular-bootstrap/ui-bootstrap-tpls.min.js",
-  "app/components/angular-ui-utils/modules/keypress/keypress.js",
-  'app/components/jquery/jquery.js',
-  'app/components/jquery-ui/ui/jquery-ui.js',
-  'app/components/jquery.colorpicker/jquery.colorpicker.js',
-  'app/scripts/*.js',
-  'app/scripts/**/*.js',
   'test/e2e/**/*.js'
 ];
 

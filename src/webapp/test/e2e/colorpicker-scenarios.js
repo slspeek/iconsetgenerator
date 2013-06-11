@@ -1,27 +1,9 @@
 /* http://docs.angularjs.org/guide/dev_guide.e2e-testing */
 
-describe('Iconset Generator ', function() {
+describe('Colorpicker', function() {
 
     beforeEach(function() {
-        browser().navigateTo('/app/');
-      });
-
-
-    it(
-      'should automatically redirect to a valid url', function() {
-        expect(browser().location().url()).toBe(
-          '/overview/0077FD/F011DD/A20099/true/true');
-      });
-
-    describe('shadow checkbox', function() {
-
-        it('should render view1 when user navigates to /view1', function() {
-            input('shadow').check(false);
-            element('#save').click();
-            expect(browser().location().url()).toBe(
-              '/overview/0077FD/F011DD/A20099/false/true');
-          });
-
+        browser().navigateTo('/app/colortest.html');
       });
 
     describe('colorpicker', function() {
@@ -44,6 +26,15 @@ describe('Iconset Generator ', function() {
             expect(element('#mainColor').val()).toBe('123456');
           });
 
+        it(
+          'open a colorpicker, and verify that the color is 000000', function() {
+            element('#mainColor').val('000000');
+            //  sleep(1);
+            element('#mainColor').click();
+            expect(element('input.ui-colorpicker-hex-input').val()).toBe('000000');
+            element('button.ui-colorpicker-ok').click();
+
+          });
       });
 
   });
