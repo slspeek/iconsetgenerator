@@ -22,14 +22,16 @@ describe('Iconset Generator ', function() {
               '/overview/0077FD/F011DD/A20099/false/true');
           });
 
-      };
+        });
 
       describe('colorpicker', function() {
 
           it(
             'open a colorpicker, change the color to 123456, and verify it worked', function() {
               element('#mainColor').click();
-              input('ui-colorpicker-hex-input').enter('123456');
+            //  sleep(1);
+              element('input.ui-colorpicker-hex-input').val('123456');
+//              input('ui-colorpicker-hex-input').enter('123456');
               //The magic with the keyup event is needed to trigger the colorpicker
               //seeing a change.
               element('input.ui-colorpicker-hex-input').query(function(el, done) {
