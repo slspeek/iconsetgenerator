@@ -37,9 +37,6 @@ var iconHistoryToken = function($scope) {
   return token;
 };
 
-var updateLocation = function($scope, $location) {
-  $location.url(iconHistoryToken($scope));
-};
 
 var strToBoolean = function(str) {
   if (str === 'false') {
@@ -48,30 +45,29 @@ var strToBoolean = function(str) {
     return true;
   }
 };
+
+var initScope = function($routeParams, $scope) {
+  $scope.shadow = strToBoolean($routeParams.Shadow);
+  $scope.onBackground = strToBoolean($routeParams.Background);
+  $scope.mainColor = $routeParams.MainColor;
+  $scope.bgColor = $routeParams.BgColor;
+  $scope.lineColor = $routeParams.LineColor;
+  $scope.iconName = $routeParams.IconName;
+};
+
 angular.module('iconApp')
-  .controller('MainCtrl', function($scope, $routeParams, $location, IconNames,
-    DrawIcon, $log) {
+  .controller('IconDesignerCtrl', function($scope, $routeParams, $location, IconNames,
+    DrawIcon) {
+    initScope($routeParams, $scope);
     $scope.iconList = IconNames.list();
-    $scope.shadow = strToBoolean($routeParams.Shadow);
-    $scope.onBackground = strToBoolean($routeParams.Background);
-    $scope.mainColor = $routeParams.MainColor;
-    $scope.bgColor = $routeParams.BgColor;
-    $scope.lineColor = $routeParams.LineColor;
-    $scope.iconName = $routeParams.IconName;
     $scope.iconUrl = '';
-    $scope.pressS = function() {
-      $log.info('Changed something');
-    };
     $scope.saveLocation = function() {
-      $log.info('Saving location');
-      updateLocation($scope, $location);
+      $location.url(iconHistoryToken($scope));
     };
     $scope.$watch(combinedWatch, function() {
-        $log.info('Watching works!');
         $scope.iconUrl = DrawIcon.get(iconParams($scope));
       });
     $scope.setLineEqualToMainColor = function() {
       $scope.lineColor = $scope.mainColor;
-      $log.info('line: ' + $scope.lineColor + ' main: ' + $scope.mainColor);
     };
   });

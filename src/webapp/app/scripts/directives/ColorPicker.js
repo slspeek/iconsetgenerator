@@ -3,14 +3,13 @@
 /* Directives */
 var app = angular.module('iconApp');
 
-// Add a directive for the bootstrap color picker widget
-// http://www.eyecon.ro/bootstrap-colorpicker/
+// Add a directive for the jquery.colorpicker widget
 app.directive('colorpicker', function() {
 
     return {
       require: '^ngModel',
       scope: {
-        cpOnClick: '&cpOnClick',
+        cpOnClose: '&cpOnClose',
         model: '=ngModel'
       },
       link: function(scope, element, attrs, controller) {
@@ -30,7 +29,7 @@ app.directive('colorpicker', function() {
                 },
                 close: function() {
                   scope.$apply(function() {
-                      scope.cpOnClick();
+                      scope.cpOnClose();
                     });
                 },
                 inline: true

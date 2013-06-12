@@ -1,11 +1,11 @@
 'use strict';
 
-describe('Controller: MainCtrl', function() {
+describe('Controller: IconDesignerCtrl', function() {
 
     // load the controller's module
     beforeEach(module('iconApp'));
 
-    var MainCtrl, $httpBackend, scope;
+    var IconDesignerCtrl,  scope;
 
     beforeEach(function() {
         this.addMatchers({
@@ -26,7 +26,7 @@ describe('Controller: MainCtrl', function() {
     // Initialize the controller and a mock scope
     beforeEach(inject(function($controller, $rootScope) {
           scope = $rootScope.$new();
-          MainCtrl = $controller('MainCtrl', {
+          IconDesignerCtrl = $controller('IconDesignerCtrl', {
               $scope: scope,
               $routeParams: {
                 BgColor: '000000',
