@@ -1,5 +1,11 @@
 'use strict';
 
+var IconNamesMock = {
+  list: function() {
+    return ['play', 'stop'];
+  }
+};
+
 describe('Controller: IconDesignerCtrl', function() {
 
     // load the controller's module
@@ -7,27 +13,12 @@ describe('Controller: IconDesignerCtrl', function() {
 
     var IconDesignerCtrl,  scope;
 
-    beforeEach(function() {
-        this.addMatchers({
-            toEqualData: function(expected) {
-              return angular.equals(this.actual, expected);
-            }
-          });
-      });
-
-    beforeEach(inject(function($httpBackend, $rootScope) {
-          scope = $rootScope.$new();
-          $httpBackend.when('GET', 'iconlist').respond([{
-                'name': 'icon'
-              }
-            ]);
-        }));
-
     // Initialize the controller and a mock scope
     beforeEach(inject(function($controller, $rootScope) {
           scope = $rootScope.$new();
           IconDesignerCtrl = $controller('IconDesignerCtrl', {
               $scope: scope,
+              IconNames: IconNamesMock,
               $routeParams: {
                 BgColor: '000000',
                 MainColor: '110011',
@@ -55,6 +46,9 @@ describe('Controller: IconDesignerCtrl', function() {
     it('should set shadow boolean', function() {
         expect(scope.shadow).toBe(true);
       });
+    it('shoud set iconlist', function() {
+        expect(scope.iconList).toEqual(['play', 'stop']);
+      });
   });
 
 describe('strToBoolean', function() {
@@ -65,3 +59,28 @@ describe('strToBoolean', function() {
         expect(strToBoolean('true')).toBe(true);
       });
   });
+
+describe('initScope', function() {
+  it('should default to true for shadow and onBackground', function() {
+    var scope = {};
+    initScope({}, scope);
+    expect(scope.shadow).toBe(true);
+    expect(scope.onBackground).toBe(true);
+  });
+  it('should give false for shadow and onBackground', function() {
+    var scope = {};
+    initScope({Shadow:'false', Background:'false'}, scope);
+    expect(scope.shadow).toBe(false);
+    expect(scope.onBackground).toBe(false);
+  });
+  it('should copy IconName param', function() {
+    var scope = {};
+    initScope({IconName:'icon'}, scope);
+    expect(scope.iconName).toBe('icon');
+  });
+  it('should copy MainColor param', function() {
+    var scope = {};
+    initScope({MainColor:'icon'}, scope);
+    expect(scope.mainColor).toBe('icon');
+  });
+});

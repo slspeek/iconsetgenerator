@@ -19,6 +19,20 @@ module.exports = function (grunt) {
   } catch (e) {}
 
   grunt.initConfig({
+    shell: {
+      iconserver: {
+        command: 'screen -d -m iconserver',
+        options: {
+          stdout: true,
+          execOptions: {
+            cwd: 'app'
+          }
+        }
+      },
+      killserver: {
+        command: 'pkill iconserver'
+      }
+    },
     yeoman: yeomanConfig,
     watch: {
       coffee: {
@@ -304,8 +318,9 @@ module.exports = function (grunt) {
     'clean:server',
     'coffee',
     'compass',
-    'connect:test',
-    'karma'
+    'shell:iconserver',
+    'karma',
+    'shell:killserver'
   ]);
 
   grunt.registerTask('build', [
