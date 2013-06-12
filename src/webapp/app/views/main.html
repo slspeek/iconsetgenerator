@@ -1,4 +1,4 @@
-<div class="container" ui-keypress="{'enter':'pressS($event)'}">
+<div class="container">
   <div class="row">
     <div class="span4">
       <img ng-src="{{iconUrl.url}}" />
@@ -6,15 +6,15 @@
     <div class="span4">
       <p>
         <label class="span2" for="maincolor">Main color</label>
-        <input id="mainColor" ng-model="mainColor" cp-on-click="saveLocation()" colorpicker type="text" name="maincolor" class="cp-input span1" />
+        <input id="mainColor" ng-model="mainColor" cp-on-close="saveLocation()" colorpicker type="text" name="maincolor" class="cp-input span1" />
       </p>
       <p>
         <label class="span2" for="background">Background</label>
-        <input ng-model="bgColor" cp-on-click="saveLocation()" colorpicker type="text" name="background" class="cp-input span1" />
+        <input ng-model="bgColor" cp-on-close="saveLocation()" colorpicker type="text" name="background" class="cp-input span1" />
       </p>
       <p>
         <label class="span2" for="linecolor">Line color</label>
-        <input ng-model="lineColor" cp-on-click="saveLocation()" colorpicker type="text" name="linecolor" class="cp-input span1" />
+        <input ng-model="lineColor" cp-on-close="saveLocation()" colorpicker type="text" name="linecolor" class="cp-input span1" />
       </p>
       <p>
         <label class="span2" for="onbackground">Draw background</label>

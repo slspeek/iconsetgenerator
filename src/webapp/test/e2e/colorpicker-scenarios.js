@@ -24,11 +24,12 @@ describe('Colorpicker', function() {
               });
             element('button.ui-colorpicker-ok').click();
             expect(element('#mainColor').val()).toBe('123456');
+            expect(element('#color').text()).toBe('Color: 123456');
           });
 
         it(
           'open a colorpicker, and verify that the color is 000000', function() {
-            element('#mainColor').val('000000');
+            input('mainColor').enter('000000');
             //  sleep(1);
             element('#mainColor').click();
             expect(element('input.ui-colorpicker-hex-input').val()).toBe('000000');
