@@ -59,6 +59,7 @@ module IconsetGenerator.Icons (
                 , stepNext
                 , stepPrevious
                 , stepUp
+                , sun
                 , switchOff
                 , turtle
                 , verticalBar
@@ -79,6 +80,23 @@ import           Diagrams.TwoD.Text   (Text)
 
 type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
 
+sun = circle sun_dia <> mconcat sparkles
+    where   sparkles = iterateN count (rotateBy ((1/count) :: CircleFrac)) line
+            count = 11
+            sun_dia = 0.4
+            sp_len = sun_dia*0.60;
+            line = vrule sp_len # translateY (0.3 + sun_dia) # lw (0.8/count) # lineCap LineCapRound
+
+moon = stroke $ centerXY $ bow 
+  where   inner = scale 0.8 $ arcT (0::CircleFrac) (0.5::CircleFrac)
+          bow = pathFromTrail (mconcat [inner, terminator])
+          c1 = r2 (0.0, 0)
+          c2 = r2 (0, 0)
+          c3 = r2 (1.6, 0)
+          rightCurve = bezier3 c1 c2 c3
+          terminator = fromSegments [rightCurve]
+
+
 locked ::  Renderable (Path R2) b => Diagram b R2
 locked = centerXY . scale 0.7 $ (translateX (0.5) bow 
            ===
@@ -86,7 +104,7 @@ locked = centerXY . scale 0.7 $ (translateX (0.5) bow
         where   bow = lw 0.10 . fcA transparent . stroke . scale 0.5 . pathFromTrail
                  $ (vertT1 `mappend` arcT (0::CircleFrac) (1/2::CircleFrac)
                  `mappend` vertT2)
-                        where   vertL = 0.3
+                        where   vertL  = 0.3
                                 vertT1 = fromOffsets [r2(0,vertL)]
                                 vertT2 = reflectY vertT1
                         
@@ -97,7 +115,7 @@ unlocked = centerXY . scale 0.7 $ (translateX (-0.5) bow
         where   bow = lw 0.10 . fcA transparent . stroke . scale 0.5 . pathFromTrail
                  $ (vertT1 `mappend` arcT (0::CircleFrac) (1/2::CircleFrac)
                  `mappend` vertT2)
-                        where   vertL = 0.5
+                        where   vertL  = 0.5
                                 vertT1 = fromOffsets [r2(0,vertL)]
                                 vertT2 = reflectY vertT1
           
@@ -109,12 +127,12 @@ turtle = translateX 0.02 . scale (1/400) . centerXY . reflectX . reflectY $ turt
                         111&90, 115&88, 144&102]
                 back = [169&86, 194&61, 216&48, 256&30, 321&13, 341&12, 350&14, 386&10, 418&11, 
                         438&16, 493&36, 548&84, 582&145, 592&174, 604&184, 582&219 ]
-                rearLegs = [552&234, 571&259, 601&291, 560&317, 520&288, 509&266]
-                belly = [376&270, 290&266, 200&268, 156&252]
-                frontLegs = [157&264, 146&297, 114&308, 84&294, 104&266, 91&208, 105&185]
+                rearLegs       = [552&234, 571&259, 601&291, 560&317, 520&288, 509&266]
+                belly          = [376&270, 290&266, 200&268, 156&252]
+                frontLegs      = [157&264, 146&297, 114&308, 84&294, 104&266, 91&208, 105&185]
                 turtle :: [P2]
-                turtle = concat [head, back, rearLegs, belly, frontLegs]
-                turtleSpline = cubicSpline True turtle
+                turtle         = concat [head, back, rearLegs, belly, frontLegs]
+                turtleSpline   = cubicSpline True turtle
 
 
 hare ::  (PathLike c, Alignable c, Transformable c, V c ~ R2) => c
@@ -137,26 +155,26 @@ reloadTree mC lC = translateX 0.1 . scale 0.8 . centerXY $ ((freeze $ treeIcon m
 
 treeIcon :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
 treeIcon mC _ = scale 0.6 . centerXY . lw 0.13 . lc mC . stroke $ mconcat tree
-        where   raT = fromOffsets $ map r2 [(0,-1),(1.25,0)]
-                raP1 = pathFromTrailAt raT (p2(-1,1))
-                raP2 = pathFromTrailAt raT (p2(-1,0))
-                raP3 = pathFromTrailAt (scaleY 0.5 raT) (p2(-1,1))
+        where   raT   = fromOffsets $ map r2 [(0,-1),(1.25,0)]
+                raP1  = pathFromTrailAt raT (p2(-1,1))
+                raP2  = pathFromTrailAt raT (p2(-1,0))
+                raP3  = pathFromTrailAt (scaleY 0.5 raT) (p2(-1,1))
                 raSP1 = pathFromTrailAt (scale 0.5 raT) (p2(-0.5, 0))
                 raSP2 = pathFromTrailAt (scale 0.5 raT) (p2(-0.5, -1))
-                tree = [raP1, raP2, raP3, raSP1, raSP2]
+                tree  = [raP1, raP2, raP3, raSP1, raSP2]
 
 defaultLineWidth ::  HasStyle a => a -> a
 defaultLineWidth = lw 0.2
 
 reload :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
 reload mC lC =  scale 0.7 . centerXY $ (stroke (handlePath )# defaultLineWidth <> arrowHead # fc mC) # lc mC
-       where a  = 1/4
-             arcTrail = arcT (0 :: CircleFrac) (-a :: CircleFrac)
-             arrowHead = eqTriangle d #  reflectY # translateY (-0.25 * d)
+       where a                     = 1/4
+             arcTrail              = arcT (0 :: CircleFrac) (-a :: CircleFrac)
+             arrowHead             = eqTriangle d #  reflectY # translateY (-0.25 * d)
              fullTrail :: Trail R2
-             fullTrail = arcTrail
-             d = 0.7
-             handlePath =  pathFromTrail fullTrail
+             fullTrail             = arcTrail
+             d                     = 0.7
+             handlePath            = pathFromTrail fullTrail
 
 switchOff :: (PathLike a, Alignable a, Transformable a, HasStyle a, V a ~ R2) =>Colour Double -> t -> a
 switchOff mC lC = lineCap LineCapRound . centerXY . scale 0.7 . lc mC . defaultLineWidth . centerXY $ arc ((1/4)+a :: CircleFrac) (1/4 - a :: CircleFrac)
@@ -188,15 +206,15 @@ leave fC lC = fc fC . lc lC . translateX (-0.1) . centerXY . scale 0.7 $ arrow <
 
 door :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
 door fC lC = (openDoor <> doorFrame # translate (r2(x/2 -d , -y/2 - a))) # centerXY
-        where   doorFrame = stroke (rect x y) # fcA transparent # lw 0.03
-                d = 0.2
-                a = 0.03
-                x = 1
-                y = -1.7
+        where   doorFrame    = stroke (rect x y) # fcA transparent # lw 0.03
+                d            = 0.2
+                a            = 0.03
+                x            = 1
+                y            = -1.7
                 doorOpenPath = fromOffsets [r2(x-d, -a), r2(0, -y), r2(-x+d, -a)]
-                doorClosed = close doorOpenPath
-                doorKnob = stroke (circle 0.04) # fc (darken 0.1 fC) # translate (r2(d/2, -y/2 -a))
-                openDoor = doorKnob <> stroke doorClosed
+                doorClosed   = close doorOpenPath
+                doorKnob     = stroke (circle 0.04) # fc (darken 0.1 fC) # translate (r2(d/2, -y/2 -a))
+                openDoor     = doorKnob <> stroke doorClosed
 
 
 radioWaves :: (Angle a, PathLike b, HasStyle b, V b ~ R2) => a -> Double -> b
@@ -423,6 +441,8 @@ zoomOut  = combineWithLoop minusIcon
 allIcons :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[([Char], Diagram b R2)]
 allIcons = [  ("running", running),
               ("hare", hare),
+              ("sun", sun),
+              ("moon", moon),
               ("locked", locked),
               ("unlocked", unlocked),
               ("turtle", turtle),
