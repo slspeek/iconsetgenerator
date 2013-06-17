@@ -19,11 +19,13 @@ module IconsetGenerator.Icons (
                 , fastForward
                 , favorite
                 , favorite'
+                , flower
                 , gear
                 , gearExample
                 , gradExample
                 , hare
                 , treeIcon
+                , haskell
                 , heart
                 , helpIcon
                 , home
@@ -38,6 +40,7 @@ module IconsetGenerator.Icons (
                 , makeColorable
                 , mapScd
                 , minusIcon
+                , moon
                 , pause
                 , pencil
                 , pencilExample
@@ -80,6 +83,29 @@ import           Diagrams.TwoD.Text   (Text)
 
 type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
 
+haskell = scale 1.3 . centerXY . stroke $ (greaterThen # translateX (-w-d)) <> lambda <> pEqual <> pBEqual
+    where   greaterThen = toPath [(w, 0), (gtX, -h/2), (-gtX, -h/2), (-w, 0), (gtX, h/2)]
+            gtX = 0.25
+            d = w/3
+            
+            lambda = toPath lVectors <> greaterThen
+            lVectors = [(w, 0), (2*gtX, -h), (-w, 0) ]
+            w = 0.2
+            h = 0.8
+            toPath = close . fromOffsets . map r2
+            grR = gtX / (h/2)
+            eh = 0.75 * w
+            uEqual = toPath [(gtX +w - grR * eh,0),  (0, eh), (-gtX  - w, 0)]
+            bEqual = toPath [(gtX + w - grR * (eh + d), 0), (0, -eh), (-gtX - w + grR * (2*eh + d), 0)]
+            pEqual = translate (r2((gtX + w + (2/3)*d), -(h/2 - d/2))) uEqual
+            pBEqual = translate (r2((gtX + w + (2/3)*d+ grR *(d)), -(h/2 + d/2))) bEqual
+
+flower = fCenter <> mconcat leaves
+    where   fCenter = circle 0.2
+            leaves = iterateN count (rotateBy ((1/count) :: CircleFrac)) leave
+            count = 11
+            leave = ellipse 0.5 # scale 0.3 # translateY 0.5 # scaleX (4/count)
+
 sun = circle sun_dia <> mconcat sparkles
     where   sparkles = iterateN count (rotateBy ((1/count) :: CircleFrac)) line
             count = 11
@@ -87,13 +113,13 @@ sun = circle sun_dia <> mconcat sparkles
             sp_len = sun_dia*0.60;
             line = vrule sp_len # translateY (0.3 + sun_dia) # lw (0.8/count) # lineCap LineCapRound
 
-moon = stroke $ centerXY $ bow 
-  where   inner = scale 0.8 $ arcT (0::CircleFrac) (0.5::CircleFrac)
+moon = stroke $ centerXY $ rotateBy (-3/8 :: CircleFrac) $ bow 
+  where   inner = scale moon_size $ arcT (0::CircleFrac) (0.5::CircleFrac)
           bow = pathFromTrail (mconcat [inner, terminator])
-          c1 = r2 (0.0, 0)
-          c2 = r2 (0, 0)
+          moon_size = 0.8
+          c1 = r2 (moon_size, 0.2)
           c3 = r2 (1.6, 0)
-          rightCurve = bezier3 c1 c2 c3
+          rightCurve = bezier3 c1 c1 c3
           terminator = fromSegments [rightCurve]
 
 
@@ -443,6 +469,8 @@ allIcons = [  ("running", running),
               ("hare", hare),
               ("sun", sun),
               ("moon", moon),
+              ("flower", flower),
+              ("haskell", haskell),
               ("locked", locked),
               ("unlocked", unlocked),
               ("turtle", turtle),
