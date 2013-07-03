@@ -1,4 +1,21 @@
 // Karma E2E configuration
+/* global basePath:true,
+         files:true,
+         exclude:true,
+         autoWatch:true,
+         browsers:true,
+         captureTimeout:true,
+         singleRun:true,
+         reporters:true,
+         runnerPort:true,
+         ANGULAR_SCENARIO:false,
+         ANGULAR_SCENARIO_ADAPTER:false,
+         LOG_INFO:false,
+         port:true,
+         colors:true,
+         proxies:true,
+         logLevel:true
+         */
 
 // base path, that will be used to resolve files and exclude
 basePath = '';
@@ -21,8 +38,8 @@ reporters = ['progress'];
 port = 8000;
 
 proxies = {
- '/app/': 'http://localhost:8000/'
- };
+  '/app/': 'http://localhost:8000/'
+};
 // cli runner port
 runnerPort = 9100;
 
@@ -44,7 +61,7 @@ autoWatch = false;
 // - Safari (only Mac)
 // - PhantomJS
 // - IE (only Windows)
-browsers = ['Chrome'];
+browsers = ['Firefox'];
 
 // If browser does not capture in given timeout [ms], kill it
 captureTimeout = 5000;
