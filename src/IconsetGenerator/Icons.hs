@@ -41,9 +41,11 @@ module IconsetGenerator.Icons (
                 , mapScd
                 , minusIcon
                 , moon
+                , mountains
                 , pause
                 , pencil
                 , pencilExample
+                , photo
                 , play
                 , plusIcon
                 , prepareAll
@@ -83,20 +85,28 @@ import           Diagrams.TwoD.Text   (Text)
 
 type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
 
-haskell = scale 1.3 . centerXY . stroke $ (greaterThen # translateX (-w-d)) <> lambda <> pEqual <> pBEqual
-    where   greaterThen = toPath [(w, 0), (gtX, -h/2), (-gtX, -h/2), (-w, 0), (gtX, h/2)]
+photo = scale 0.75 ( freeze (roundedRect 2 1.5  0.2 # fcA transparent # lw 0.03
+                     <> centerXY ( mountains <> (translate (r2 (0.6,0.5)) ( scale (1/3) sun)))))
+
+mountains = centerXY $ biggerMountain <> smallerMountain
+    where   biggerMountain = eqTriangle 1.1 # alignB
+            smallerMountain = scale (1-d) biggerMountain # translateX (2 * d) 
+            d = 0.2
+
+haskell mC lC = scale 1.3 . centerXY $ (greaterThen mC # translateX (-w-d)) <> lambda <> pEqual <> pBEqual
+    where   greaterThen mC = toPath [(w, 0), (gtX, -h/2), (-gtX, -h/2), (-w, 0), (gtX, h/2)] # fc mC # lc mC
             gtX = 0.25
             d = w/3
-            
-            lambda = toPath lVectors <> greaterThen
+            darkerColor = darken 0.3 mC
+            lambda = (toPath lVectors <> greaterThen darkerColor) # fc darkerColor # lc darkerColor
             lVectors = [(w, 0), (2*gtX, -h), (-w, 0) ]
             w = 0.2
             h = 0.8
-            toPath = close . fromOffsets . map r2
+            toPath = stroke . close . fromOffsets . map r2
             grR = gtX / (h/2)
             eh = 0.75 * w
-            uEqual = toPath [(gtX +w - grR * eh,0),  (0, eh), (-gtX  - w, 0)]
-            bEqual = toPath [(gtX + w - grR * (eh + d), 0), (0, -eh), (-gtX - w + grR * (2*eh + d), 0)]
+            uEqual = toPath [(gtX +w - grR * eh,0),  (0, eh), (-gtX  - w, 0)] # fc mC # lc mC
+            bEqual = toPath [(gtX + w - grR * (eh + d), 0), (0, -eh), (-gtX - w + grR * (2*eh + d), 0)]# fc mC # lc mC
             pEqual = translate (r2((gtX + w + (2/3)*d), -(h/2 - d/2))) uEqual
             pBEqual = translate (r2((gtX + w + (2/3)*d+ grR *(d)), -(h/2 + d/2))) bEqual
 
@@ -467,10 +477,10 @@ zoomOut  = combineWithLoop minusIcon
 allIcons :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[([Char], Diagram b R2)]
 allIcons = [  ("running", running),
               ("hare", hare),
+              ("mountains", mountains),
               ("sun", sun),
               ("moon", moon),
               ("flower", flower),
-              ("haskell", haskell),
               ("locked", locked),
               ("unlocked", unlocked),
               ("turtle", turtle),
@@ -479,6 +489,7 @@ allIcons = [  ("running", running),
               ("heart", heart),
               ("favorite", favorite),
               ("pencil", pencilExample),
+              ("photo", photo),
               ("right_arrow", rightArrow),
               ("left_arrow", leftArrow),
               ("up_arrow", upArrow),
@@ -514,6 +525,7 @@ colorableList = [
             ("rss", rssIcon),
             ("userGroup", userGroup),
             ("user", user),
+            ("haskell", haskell),
             ("switch_off", switchOff),
             ("reload", reload),
             ("leave", leave),
