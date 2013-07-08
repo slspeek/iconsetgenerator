@@ -5,35 +5,17 @@ module IconsetGenerator.CmdLine
        ) where
 
 import IconsetGenerator.Icons
-import Data.List (intercalate)
 import Diagrams.Prelude hiding (width, height, interval)
 import Diagrams.Backend.Cairo
 
--- Below hack is needed because GHC 7.0.x has a bug regarding export
 -- of data family constructors; see comments in Diagrams.Backend.Cairo
 #if __GLASGOW_HASKELL__ < 702 || __GLASGOW_HASKELL__ >= 704
 import Diagrams.Backend.Cairo.Internal
 #endif
 
 import System.Console.CmdArgs.Implicit hiding (args)
-
-import Prelude hiding      (catch)
-
-import Data.Maybe          (fromMaybe)
-import Control.Monad       (when, forM_, mplus)
 import Data.List.Split
-
-import Text.Printf
-
-import System.Environment  (getArgs, getProgName)
-import System.Directory    (getModificationTime)
-import System.FilePath     (addExtension, splitExtension)
-import System.Process      (runProcess, waitForProcess)
-import System.IO           (openFile, hClose, IOMode(..),
-                            hSetBuffering, BufferMode(..), stdout)
-import System.Exit         (ExitCode(..))
-import Control.Concurrent  (threadDelay)
-import Control.Exception   (catch, SomeException(..), bracket)
+import System.Environment  (getProgName)
 
 #ifdef CMDLINELOOP
 import System.Posix.Process (executeFile)

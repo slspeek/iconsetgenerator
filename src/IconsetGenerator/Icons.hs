@@ -76,25 +76,26 @@ module IconsetGenerator.Icons (
                 , zoomOut
                                 ) where
 
-import           Data.Colour          (withOpacity)
 import           Data.Colour.SRGB
-import           Diagrams.Core.Points
 import           Diagrams.Prelude
 import           Diagrams.TwoD.Arc
 import           Diagrams.TwoD.Text   (Text)
 
 type DichromeIcon b = Colour Double -> Colour Double -> Diagram b R2
 
+photo :: (Semigroup m, PathLike (QDiagram b R2 m), Monoid m) =>QDiagram b R2 m
 photo = scale 0.75 ( freeze (roundedRect 2 1.5  0.2 # fcA transparent # lw 0.03
                      <> centerXY ( mountains <> (translate (r2 (0.6,0.5)) ( scale (1/3) sun)))))
 
+mountains :: (PathLike a, Alignable a, Transformable a, V a ~ R2) => a
 mountains = centerXY $ biggerMountain <> smallerMountain
     where   biggerMountain = eqTriangle 1.1 # alignB
             smallerMountain = scale (1-d) biggerMountain # translateX (2 * d) 
             d = 0.2
 
-haskell mC lC = scale 1.3 . centerXY $ (greaterThen mC # translateX (-w-d)) <> lambda <> pEqual <> pBEqual
-    where   greaterThen mC = toPath [(w, 0), (gtX, -h/2), (-gtX, -h/2), (-w, 0), (gtX, h/2)] # fc mC # lc mC
+haskell :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
+haskell mC _ = scale 1.3 . centerXY $ (greaterThen mC # translateX (-w-d)) <> lambda <> pEqual <> pBEqual
+    where   greaterThen mainColor = toPath [(w, 0), (gtX, -h/2), (-gtX, -h/2), (-w, 0), (gtX, h/2)] # fc mC # lc mainColor
             gtX = 0.25
             d = w/3
             darkerColor = darken 0.3 mC
@@ -110,12 +111,14 @@ haskell mC lC = scale 1.3 . centerXY $ (greaterThen mC # translateX (-w-d)) <> l
             pEqual = translate (r2((gtX + w + (2/3)*d), -(h/2 - d/2))) uEqual
             pBEqual = translate (r2((gtX + w + (2/3)*d+ grR *(d)), -(h/2 + d/2))) bEqual
 
-flower = fCenter <> mconcat leaves
+flower ::  (PathLike a, Transformable a, V a ~ R2) => a
+flower = fCenter <> mconcat leafs
     where   fCenter = circle 0.2
-            leaves = iterateN count (rotateBy ((1/count) :: CircleFrac)) leave
+            leafs = iterateN count (rotateBy ((1/count) :: CircleFrac)) leaf
             count = 11
-            leave = ellipse 0.5 # scale 0.3 # translateY 0.5 # scaleX (4/count)
+            leaf = ellipse 0.5 # scale 0.3 # translateY 0.5 # scaleX (4/count)
 
+sun ::  (PathLike a, Transformable a, HasStyle a, V a ~ R2) => a
 sun = circle sun_dia <> mconcat sparkles
     where   sparkles = iterateN count (rotateBy ((1/count) :: CircleFrac)) line
             count = 11
@@ -123,6 +126,7 @@ sun = circle sun_dia <> mconcat sparkles
             sp_len = sun_dia*0.60;
             line = vrule sp_len # translateY (0.3 + sun_dia) # lw (0.8/count) # lineCap LineCapRound
 
+moon ::  Renderable (Path R2) b => Diagram b R2
 moon = stroke $ centerXY $ rotateBy (-3/8 :: CircleFrac) $ bow 
   where   inner = scale moon_size $ arcT (0::CircleFrac) (0.5::CircleFrac)
           bow = pathFromTrail (mconcat [inner, terminator])
@@ -158,23 +162,22 @@ unlocked = centerXY . scale 0.7 $ (translateX (-0.5) bow
 
 turtle ::  (PathLike c, Alignable c, Transformable c, V c ~ R2) => c
 turtle = translateX 0.02 . scale (1/400) . centerXY . reflectX . reflectY $ turtleSpline
-        where   head :: [P2]
-                head = [114&180,  76&161, 40&132, 18&119, 14&109, 3&105, 2&90, 8&66, 31&59, 76&70,
+        where   turtleHead :: [P2]
+                turtleHead = [114&180,  76&161, 40&132, 18&119, 14&109, 3&105, 2&90, 8&66, 31&59, 76&70,
                         111&90, 115&88, 144&102]
                 back = [169&86, 194&61, 216&48, 256&30, 321&13, 341&12, 350&14, 386&10, 418&11, 
                         438&16, 493&36, 548&84, 582&145, 592&174, 604&184, 582&219 ]
                 rearLegs       = [552&234, 571&259, 601&291, 560&317, 520&288, 509&266]
                 belly          = [376&270, 290&266, 200&268, 156&252]
                 frontLegs      = [157&264, 146&297, 114&308, 84&294, 104&266, 91&208, 105&185]
-                turtle :: [P2]
-                turtle         = concat [head, back, rearLegs, belly, frontLegs]
-                turtleSpline   = cubicSpline True turtle
+                turtleShape         = concat [turtleHead, back, rearLegs, belly, frontLegs]
+                turtleSpline   = cubicSpline True turtleShape
 
 
 hare ::  (PathLike c, Alignable c, Transformable c, V c ~ R2) => c
 hare = translateX 0.02 . scale (1/196) . centerXY . reflectX . reflectY $ hareSpline
-        where   head :: [P2]
-                head = [59&84.5, 51&74.5, 40&71, 40&61.5, 55.5&45, 65.5&38.5, 62&17, 67&5, 71.5&3.5,
+        where   hareHead :: [P2]
+                hareHead = [59&84.5, 51&74.5, 40&71, 40&61.5, 55.5&45, 65.5&38.5, 62&17, 67&5, 71.5&3.5,
                         73.5&4.5, 79.5&0, 84&1.5, 85.5&17, 84&30, 80.5&38, 82&48.5, 89&56, 94.5&60]
                 back = [107.5&63, 155.5&70.5, 191&69.5, 216&63.5, 234.5&68.5, 246&79, 252.5&97.5,
                         257&108.5]
@@ -183,8 +186,8 @@ hare = translateX 0.02 . scale (1/196) . centerXY . reflectX . reflectY $ hareSp
                 belly = [191&117, 159&126, 121&127, 85&123, 75.5&123.5]
                 frontLegs = [46.5&144, 20.5&157.5, 9.5&149, 30.5&143.5, 58.5&122.5, 30.5&117.5,
                         7.5&118, 0&111, 32.5&108.5, 56.5&105, 55.5&91.5]
-                hare = concat [head, back, rearLegs, belly, frontLegs]
-                hareSpline = cubicSpline True hare
+                hareShape = concat [hareHead, back, rearLegs, belly, frontLegs]
+                hareSpline = cubicSpline True hareShape
 
 reloadTree :: (Renderable (Path R2) b, Backend b R2) =>Colour Double -> t -> QDiagram b R2 Any
 reloadTree mC lC = translateX 0.1 . scale 0.8 . centerXY $ ((freeze $ treeIcon mC lC) ||| strutX 0.15 ||| (scale (4/7) $ freeze $ reflectX $ reload mC lC))
@@ -203,7 +206,7 @@ defaultLineWidth ::  HasStyle a => a -> a
 defaultLineWidth = lw 0.2
 
 reload :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
-reload mC lC =  scale 0.7 . centerXY $ (stroke (handlePath )# defaultLineWidth <> arrowHead # fc mC) # lc mC
+reload mC _ =  scale 0.7 . centerXY $ (stroke (handlePath )# defaultLineWidth <> arrowHead # fc mC) # lc mC
        where a                     = 1/4
              arcTrail              = arcT (0 :: CircleFrac) (-a :: CircleFrac)
              arrowHead             = eqTriangle d #  reflectY # translateY (-0.25 * d)
@@ -213,7 +216,7 @@ reload mC lC =  scale 0.7 . centerXY $ (stroke (handlePath )# defaultLineWidth <
              handlePath            = pathFromTrail fullTrail
 
 switchOff :: (PathLike a, Alignable a, Transformable a, HasStyle a, V a ~ R2) =>Colour Double -> t -> a
-switchOff mC lC = lineCap LineCapRound . centerXY . scale 0.7 . lc mC . defaultLineWidth . centerXY $ arc ((1/4)+a :: CircleFrac) (1/4 - a :: CircleFrac)
+switchOff mC _ = lineCap LineCapRound . centerXY . scale 0.7 . lc mC . defaultLineWidth . centerXY $ arc ((1/4)+a :: CircleFrac) (1/4 - a :: CircleFrac)
                 <>
                 vrule 1 # translateY 0.6
         where   a = 1/13
@@ -241,7 +244,7 @@ leave fC lC = fc fC . lc lC . translateX (-0.1) . centerXY . scale 0.7 $ arrow <
         where   arrow = rightArrow #  scale 0.8 # translate (r2(-0.9,0))
 
 door :: Renderable (Path R2) b => Colour Double -> t -> Diagram b R2
-door fC lC = (openDoor <> doorFrame # translate (r2(x/2 -d , -y/2 - a))) # centerXY
+door fC _ = (openDoor <> doorFrame # translate (r2(x/2 -d , -y/2 - a))) # centerXY
         where   doorFrame    = stroke (rect x y) # fcA transparent # lw 0.03
                 d            = 0.2
                 a            = 0.03
@@ -259,7 +262,7 @@ radioWaves a n = mconcat waves # fcA transparent
 
 
 rssIcon :: (PathLike b, Color c, Transformable b, HasStyle b, V b ~ R2) =>c -> t -> b
-rssIcon mainColor lC = (circle 0.08 <> radioWaves (1/4::CircleFrac)  3) # lineCap LineCapRound # lw 0.1 # translate (-r2(0.4,0.4)) # lineColor mainColor # fillColor mainColor
+rssIcon mainColor _ = (circle 0.08 <> radioWaves (1/4::CircleFrac)  3) # lineCap LineCapRound # lw 0.1 # translate (-r2(0.4,0.4)) # lineColor mainColor # fillColor mainColor
 
 
 key ::  Renderable (Path R2) b => Diagram b R2
@@ -283,7 +286,7 @@ gear teeth = stroke (fromVertices plusPath  <> circle 0.8) # fillRule EvenOdd # 
               angle = CircleFrac (1/teeth)
               a = pi / teeth
               th = 1/4
-              spike = map p2 [(-a, 1), (-(2/3) * a,1 + (th*th)), (-(1/3)* a, 1+th), (a/3, 1 + th), ((2/3)*a,1+(th^2)), (a,1)]
+              spike = map p2 [(-a, 1), (-(2/3) * a,1 + (th*th)), (-(1/3)* a, 1+th), (a/3, 1 + th), ((2/3)*a,1+(th*th)), (a,1)]
 
 
 gearExample ::  Renderable (Path R2) b => Diagram b R2
@@ -307,7 +310,7 @@ gradExample :: (PathLike a, Transformable a, HasStyle a, V a ~ R2) =>
 gradExample  = const $  const $ mconcat coloredCircles
         where circles = take count $ iterate (scale 0.99) (circle 1)
               colors = take count $ iterate (blend 0.01 blue) red
-              coloredCircles = [ lc color circle| (color, circle) <- zip colors circles]
+              coloredCircles = [ lc color aCircle| (color, aCircle) <- zip colors circles]
               count = 200
 
 
@@ -374,7 +377,6 @@ pencil w h pointL = centerXY $ stroke pencilPath # lineJoin LineJoinRound
           b = h/4
           lineS = Linear (r2(w,0))
           pointS = Linear (r2(pointL, -(h/2)))
-          rightCurveS = reverseSegment leftCurveS
           pencilPath = close $ fromSegments [leftCurveS, lineS, pointS, reverseSegment $ reflectY pointS]
 
 
@@ -521,7 +523,7 @@ mapScd f = map f'
 
 colorableList :: (Renderable (Path R2) b, Backend b R2) =>[([Char], Colour Double -> Colour Double -> Diagram b R2)]
 colorableList = [
-            ( "mail", enveloppe ),
+            ("mail", enveloppe ),
             ("rss", rssIcon),
             ("userGroup", userGroup),
             ("user", user),
@@ -543,7 +545,7 @@ iconNames = ["overview"] ++ map fst (totalIconList :: [([Char], Colour Double ->
  -- backgroundShape = (star (StarSkip 2) (regPoly 8 1) ) # stroke # fc themeBc # scale 1.3
 backgroundShape' :: (PathLike b, Transformable b, HasStyle b, V b ~ R2) =>
      Colour Double -> Colour Double -> b
-backgroundShape' color lineC = circle 1  # fc color # lw 0
+backgroundShape' color _ = circle 1  # fc color # lw 0
 
 shadowDirection ::  R2
 shadowDirection = r2 (0.05, -0.05)
@@ -568,9 +570,9 @@ setOnBackground bC lC = mapScd (\icon -> icon <> backgroundShape' bC lC)
 centerInCircle :: (PathLike t2, Transformable t2, HasStyle t2, V t2 ~ R2) =>[(t1, t2)] -> [(t1, t2)]
 centerInCircle = mapScd (\icon -> icon <> (circle 1 # lw 0))
 
-evenChunksOff ::  Int -> [a] -> [[a]]
-evenChunksOff n [] = []
-evenChunksOff n notnull = (take n notnull): evenChunksOff n (drop n notnull)
+chunksOff ::  Int -> [a] -> [[a]]
+chunksOff _ [] = []
+chunksOff n notnull = (take n notnull): chunksOff n (drop n notnull)
 
 prepareAll :: (Renderable Text b, Renderable (Path R2) b, Backend b R2) =>[Char]-> [Char]-> [Char]-> Bool-> Bool-> [([Char], QDiagram b R2 Any)]
 prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
@@ -588,6 +590,6 @@ prepareAll f b l shadow background =  ( "overview", overviewImage) : allPadded
                 noBG =  centerInCircle $ applyTheming fC lC True totalIconList
                 noBGnoSh =  centerInCircle $ applyTheming fC lC False totalIconList
                 noShadow = setOnBackground bC lC $ applyTheming fC lC False totalIconList
-                overviewImage = vcat' with { sep = 1}  $ map (vcat . (map hcat) . (evenChunksOff 10) . map snd . padList) [noBGnoSh, noBG, noShadow, onBackground]
+                overviewImage = vcat' with { sep = 1}  $ map (vcat . (map hcat) . (chunksOff 10) . map snd . padList) [noBGnoSh, noBG, noShadow, onBackground]
 
 

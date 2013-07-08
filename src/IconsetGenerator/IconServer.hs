@@ -2,14 +2,12 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Main where
-import Control.Applicative ((<$>), optional)
-import Data.Maybe (fromMaybe)
+import Control.Applicative (optional)
 import Data.Text (Text)
 import Data.Text.Lazy (unpack)
 import Control.Monad.IO.Class
 import Happstack.Lite
-import Text.Blaze.Html5 (Html, (!), a, img, form, input, p, toHtml, label)
-import Text.Blaze.Html5.Attributes (action, enctype, href, name, size, src, type_, value)
+import Text.Blaze.Html5 (Html, (!), a,  p, toHtml)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import IconsetGenerator.CmdLine
@@ -19,7 +17,6 @@ import System.Environment  (withArgs)
 import Text.JSON.Generic
 import System.IO 
 import Data.Text.Lazy (pack)
-import Data.String (fromString)
 import Data.List(sort)
 
 data IconName = IconName {
@@ -52,7 +49,7 @@ template title body = toResponse $
         H.title (toHtml title)
         H.body $ do
         body
-        p $ a ! href "/" $ "back home"
+        p $ a ! A.href "/" $ "back home"
 
 jsonRoute ::  ServerPart Response
 jsonRoute = do return $ toResponse $ iconNamesJSON
@@ -61,7 +58,7 @@ homePage :: ServerPart Response
 homePage = do
         ok $ template "home page" $ do
         H.h1 "Hello!"
-        H.p $ (a ! href ("/icongenerator?onbackground=true&shadow=true&width=640&height=640&iconname=overview&bgcolor=F00000&maincolor=FFF0FF&linecolor=556555" )$ "Iconset generator")
+        H.p $ (a ! A.href ("/icongenerator?onbackground=true&shadow=true&width=640&height=640&iconname=overview&bgcolor=F00000&maincolor=FFF0FF&linecolor=556555" )$ "Iconset generator")
 
 fileServing :: ServerPart Response
 fileServing =
@@ -70,9 +67,9 @@ fileServing =
 
 tempFile :: ServerPart String
 tempFile = liftIO $ do
-               (path, handle) <-  openBinaryTempFile "icontmp" "isg.png"
+               (tempFilePath, handle) <-  openBinaryTempFile "icontmp" "isg.png"
                hClose handle
-               return path  
+               return tempFilePath
 
 icongenerator :: ServerPart Response
 icongenerator =
@@ -103,5 +100,4 @@ icongenerator =
                                 Just _ -> "--onbackground":iconArgs''
                 liftIO (putStrLn $ "args: " ++ show iconArgs)
                 liftIO (withArgs iconArgs multiMain)
-                let path = IconUrl $ output
-                return $ toResponse $ encodeJSON (path)
+                return $ toResponse $ encodeJSON (IconUrl $ output)
